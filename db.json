@@ -1,4 +1,7 @@
 {
+  "products":[
+    {"name":"Modern Chair","price":"20.00","img":""}
+  ],
   "posts": [
     { "id": 1, "title": "Post 1" },
     { "id": 2, "title": "Post 2" },
