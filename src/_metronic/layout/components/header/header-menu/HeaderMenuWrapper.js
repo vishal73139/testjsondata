@@ -39,14 +39,16 @@ export function HeaderMenuWrapper() {
                     {/*begin::Header Logo*/}
                     <div className="header-logo">
                         <Link to="/">
-                            <img alt="logo" src={getHeaderLogo()}/>
+                            <h3 style={{mariginTop:'5px'}}>Data Pure</h3> 
                         </Link>
                     </div>
                     {/*end::Header Logo*/}
                 </>
             )}
+            <br/>
+            <h3 style={{mariginTop:'5px'}}>Capital Markets Hackathon</h3>
             {/*begin::Header Menu*/}
-            <HeaderMenu layoutProps={layoutProps} />
+            {/*<HeaderMenu layoutProps={layoutProps} />*/}
             {/*end::Header Menu*/}
         </div>
         {/*Header Menu Wrapper*/}

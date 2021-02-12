@@ -29,7 +29,8 @@ export function Brand() {
       >
         {/* begin::Logo */}
         <Link to="" className="brand-logo">
-          <img alt="logo" src={layoutProps.headerLogo}/>
+          <h3 style={{mariginTop:'5px'}}>Data Pure</h3> 
+          {/*<img alt="logo" src={layoutProps.headerLogo}/>*/}
         </Link>
         {/* end::Logo */}
 

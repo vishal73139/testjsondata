@@ -72,7 +72,7 @@ export function SubHeader() {
             <BreadCrumbs items={subheader.breadcrumbs} />
           </div>
 
-          {/* Toolbar */}
+          {/* Toolbar 
           <div className="d-flex align-items-center">
             <a href="#" className="btn btn-light btn-sm font-weight-bold" id="kt_dashboard_daterangepicker"
                data-toggle="tooltip" title="Select dashboard daterange" data-placement="left">
@@ -81,6 +81,7 @@ export function SubHeader() {
             </a>
             <QuickActions/>
           </div>
+          */}
         </div>
       </div>
   );
