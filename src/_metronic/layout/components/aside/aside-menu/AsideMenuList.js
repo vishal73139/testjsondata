@@ -48,7 +48,7 @@ export function AsideMenuList({ layoutProps }) {
           data-menu-toggle="hover"
         >
         
-          <NavLink className="menu-link menu-toggle" to="/google-material">
+          <NavLink className="menu-link menu-toggle" to="/create-rules">
             <span className="svg-icon menu-icon">
               <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Cap-2.svg")} />
             </span>
@@ -56,7 +56,7 @@ export function AsideMenuList({ layoutProps }) {
             <i className="menu-arrow" />
           </NavLink>
 
-          <NavLink className="menu-link menu-toggle" to="/google-material">
+          <NavLink className="menu-link menu-toggle" to="/view-rules">
             <span className="svg-icon menu-icon">
               <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Cap-2.svg")} />
             </span>
@@ -64,7 +64,7 @@ export function AsideMenuList({ layoutProps }) {
             <i className="menu-arrow" />
           </NavLink>
 
-          <NavLink className="menu-link menu-toggle" to="/google-material">
+          <NavLink className="menu-link menu-toggle" to="/execute-rules">
             <span className="svg-icon menu-icon">
               <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Cap-2.svg")} />
             </span>
