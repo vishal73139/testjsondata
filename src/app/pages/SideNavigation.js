@@ -20,49 +20,50 @@ export const SideNavigation = (props) => {
 			            <NavText eventKey="tools">
 			                <div className="side-menu-header">Tools</div>
 			            </NavText>
-			            <NavItem>
-			            	<NavText>
+			            <NavItem onClick={()=>props.addNode('AND','#00cab6','#000000','Conjunction')}>
+			            	<NavText>	
 			            		<div class="legend" def="AND"></div><span class="centerNav">AND </span>
 			            	</NavText>
 			            </NavItem>
-			            <NavItem>
+			            <NavItem onClick={()=>props.addNode('OR','#00cab6','#000000','Conjunction')}>
 			            	<NavText>
 			            		<div class="legend" def="OR"></div><span class="centerNav">OR </span>
 			            	</NavText>
 			            </NavItem>
-			            <NavItem>
+			            <NavItem onClick={()=>props.addNode('NOT','#00cab6','#000000','Conjunction')}>
 			            	<NavText>
 			            		<div class="legend" def="NOT"></div><span class="centerNav">NOT </span>
 			            	</NavText>
 			            </NavItem>
 			        </NavItem>
 
-			        <NavItem eventKey="home">
+			        <NavItem eventKey="condition">
 			            <NavIcon>
-			                <i className="fa fa-fw fa-home" style={{ fontSize: '1.75em' }} />
-			            </NavIcon>
-			            <NavText>
-			                Home
+			            <FontAwesomeIcon icon={faCogs} /></NavIcon>
+			            <NavText eventKey="side-menu" eventKey="condition">
+			                <div className="side-menu-header">Condition</div>
 			            </NavText>
-			        </NavItem>
-			        <NavItem eventKey="charts">
-			            <NavIcon>
-			                <i className="fa fa-fw fa-line-chart" style={{ fontSize: '1.75em' }} />
-			            </NavIcon>
-			            <NavText>
-			                Charts
-			            </NavText>
-			            <NavItem eventKey="charts/linechart">
-			                <NavText>
-			                    Line Chart
-			                </NavText>
+			            <NavItem>
+			            	<NavText>
+			            		<div class="legend" def="condition/AND"></div><span class="centerNav">Simple Condition </span>
+			            	</NavText>
 			            </NavItem>
-			            <NavItem eventKey="charts/barchart">
-			                <NavText>
-			                    Bar Chart
-			                </NavText>
-			            </NavItem>
-			        </NavItem>
+			            <NavItem>
+			            	<NavText>
+			            		<div class="legend" def="condition/OR"></div><span class="centerNav">Currency Condition </span>
+			            	</NavText>
+			            </NavItem> 
+			        </NavItem>  
+
+			         <NavItem eventKey="edge" onClick={()=>{props.addEdge()}}>
+			         	<NavIcon>
+			            <FontAwesomeIcon icon={faProjectDiagram} /></NavIcon> 
+			            	<NavText>
+			            		 <div className="side-menu-header">Edge</div>
+			            	</NavText> 
+			         </NavItem>  
+
+
 			    </SideNav.Nav>
 			</SideNav>
 		)
