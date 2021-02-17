@@ -8,6 +8,7 @@ import {faTools,faCogs,faTrash,faProjectDiagram,faBriefcase} from '@fortawesome/
 export const SideNavigation = (props) => {
 	return(
 		<SideNav
+		style={{zIndex:'1'}}
 			    onSelect={(selected) => {
 			        // Add your code here
 			    }}

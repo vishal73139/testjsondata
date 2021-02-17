@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import Graph from "react-graph-vis";
 import {SideNavigation} from "./SideNavigation";
 import swal from 'sweetalert';
-import {Modal,Button} from 'react-bootstrap';
+import {Modal,Button,Form,InputGroup, Col} from 'react-bootstrap';
 import _ from 'underscore';
 
 const pushStartNode = (inputNodes,inputEdges) =>{
@@ -213,7 +213,11 @@ constructor(props){
 		finalSelectedTable:'',
 		finalSelectedAttribute:'',
 		finalSelectedOperator:'',
-		finalConditionValue:''
+		finalConditionValue:'',
+		validated:false,
+		ruleSqlQuery:'',
+		createdRuleName:'',
+		createdRuleDescription:''
 
 	}
 }	
@@ -233,6 +237,18 @@ handleSave = () => {
 	addNode(conditionName,'green','white','Conjunction');
 
 	this.setState({showCreateRuleModal:false});
+}
+
+submitForm = () => {
+	if(this.state.createdRuleName == '' || this.state.createdRuleDescription == '')
+		swal("Please Provide Valid Rule name and Description!", {icon:"error"});
+	else
+		this.generateQuery();
+
+}
+
+generateQuery = () => {
+	alert('asdasd');
 }
 
 render(){	
@@ -324,7 +340,45 @@ render(){
   };
 
   return (
-  	 <div className="card card-custom">
+  	 <div>
+  	  
+  	 <div className="card card-custom" style={{padding:'20px'}}>
+  	 	<div>
+  	 	
+        <Form.Row>
+          <Form.Group as={Col} md="6" controlId="validationCustom01">
+            <Form.Label>Rule name</Form.Label>
+            <Form.Control
+              required
+              type="text"
+              placeholder="Rule name" 
+              onChange={(event)=>{
+          		
+          		let selectedValue = event.target.value;
+          		this.setState({createdRuleName:selectedValue});
+          	}} 
+            /> 
+          </Form.Group>
+          <Form.Group as={Col} md="6" controlId="validationCustom02">
+            <Form.Label>Rule Description</Form.Label>
+            <Form.Control
+              required
+              type="text"
+              placeholder="Rule Description" 
+              onChange={(event)=>{
+          		
+          		let selectedValue = event.target.value;
+          		this.setState({createdRuleDescription:selectedValue});
+          	}} 
+            /> 
+          </Form.Group>
+           
+        </Form.Row>
+      
+      </div>
+  	 </div>
+
+  	 <div className="card card-custom" style={{marginTop:'20px'}}>
   	 <SideNavigation 
 	  	 network={network}
 	  	 addNode={addNode}
@@ -348,48 +402,69 @@ render(){
             <Modal.Title>Add Condition</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-          	<select className="select" onChange={(event)=>{
+          <Form.Row>
+          <Form.Group as={Col} controlId="formGridState">
+		      <Form.Label>Table Name</Form.Label>
+		      <Form.Control as="select" onChange={(event)=>{
           		let selectedValue = event.target.value;
           		let allAttributeValues = this.state.attributeForRule[selectedValue];
           		this.setState({selectedTablesAttributes:allAttributeValues,finalSelectedTable:selectedValue});
           	}}>
-          		<option>-- Select Table --</option>
-          		{
+		        <option>Choose...</option>
+		       	{
           			_.map(this.state.rulesTables,(value)=>{
           				return(<option>{value}</option>);
           			})
           		} 
-          	</select>
-
-          	<select className="select" onChange={(event)=>{
+		      </Form.Control>
+		    </Form.Group>
+		     <Form.Group as={Col} controlId="formGridAttribute">
+		      <Form.Label>Attribute Name</Form.Label>
+		      <Form.Control as="select" onChange={(event)=>{
           		let selectedValue = event.target.value;
           		this.setState({finalSelectedAttribute:selectedValue});
           	}}>
-          		<option>-- Select Attribute --</option>
-          		{
+		        <option>Choose...</option>
+		       {
           			_.map(this.state.selectedTablesAttributes,(value)=>{
           				return(<option>{value}</option>);
-          			})
+          				})
           		}
-          	</select>
-
-          	<select className="select" onChange={(event)=>{
+          			
+		      </Form.Control>
+		    </Form.Group>
+		   
+			</Form.Row>
+          	
+          	<Form.Row>
+          		<Form.Group as={Col} controlId="formGridCondition">
+		      <Form.Label>Operator</Form.Label>
+		      <Form.Control as="select" onChange={(event)=>{
           		let selectedValue = event.target.value;
           		this.setState({finalSelectedOperator:selectedValue});
           	}}>
-          		<option>-- Select Operator --</option> 
-          		{
+		        <option>Choose...</option>
+		       	{
           			_.map(this.state.conditionOperators,(value)=>{
           				return(<option>{value}</option>);
           			})
           		}
-          	</select>
-          	<input type="text" onChange={(event)=>{
+		      </Form.Control>
+		    </Form.Group>
+		     <Form.Group as={Col} controlId="formGridTextCondition">
+	            <Form.Label>Condition</Form.Label>
+	            <Form.Control
+	              required
+	              type="text"
+	              placeholder="Condition" 
+	              onChange={(event)=>{
           		
           		let selectedValue = event.target.value;
           		this.setState({finalConditionValue:selectedValue});
-          	}} />
-          	
+          	}} 
+	            /> 
+	          </Form.Group> 
+          	</Form.Row>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={this.handleClose}>
@@ -401,6 +476,21 @@ render(){
           </Modal.Footer>
         </Modal>
 	    </div>
+    </div>
+
+    <div className="card card-custom" style={{padding:'20px',marginTop:'20px',textAlign:'center'}}>
+  	 	<div>
+  	 		<Button variant="primary" type="submit">
+			    Show Rule Query
+			 </Button>
+  	 		<Button variant="primary" type="submit" style={{marginLeft:'10px'}} onClick={()=>{
+  	 			this.submitForm();
+  	 		}}>
+			    Create Rule
+			 </Button>
+      	</div>
+  	 </div>
+	 
     </div>
   );
 }
