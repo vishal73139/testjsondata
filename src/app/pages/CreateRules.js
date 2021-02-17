@@ -174,7 +174,37 @@ const deleteNodeValidation = (data,network) => {
 	return callback_status;
 }
 
+const removeStart = (networkData) => {
+	networkData.nodes.remove(0);
+	if(networkData.edges.length !== 0){
+		let edgeid = "0%"+0;
+		networkData.edges.remove(edgeid);
+	}
+}
 
+const getPlaceHolderValue = (operator,val) => {
+	switch(operator){
+		case "Substring":
+			return "Substring ("+val+") ";
+		case "IS NOT":
+		case "IS":
+			return operator+" NULL ";
+		case "IN":
+		case "NOT IN":
+			return operator+" ("+'\''+val.split(',').join('\',\'')+'\''+") ";
+		case "LENGTH <":
+		case "LENGTH <=":
+		case "LENGTH >":
+		case "LENGTH >=":
+		case "<":
+		case "<=":
+		case ">":
+		case ">=":
+			return operator+" "+val+" ";
+		default:
+			return operator+" '"+val+"' ";
+	}
+}
 
 
 export default class CreateRules extends Component {
@@ -207,7 +237,15 @@ constructor(props){
 			'>',
 			'<',
 			'>=',
-			'<='
+			'<=',
+			'IN',
+			'NOT IN',
+			'LENGTH <',
+			'LENGTH <=',
+			'LENGTH >',
+			'LENGTH >=',
+			'IS',
+			'IS NOT'
 		],	
 		selectedTablesAttributes:[],
 		finalSelectedTable:'',
@@ -232,7 +270,7 @@ handleClose = () => {
 
 handleSave = () => { 
 
-	let conditionName = this.state.finalSelectedTable+'.'+this.state.finalSelectedAttribute+' '+this.state.finalSelectedOperator+' '+this.state.finalConditionValue;
+	let conditionName = this.state.finalSelectedTable+'.'+this.state.finalSelectedAttribute+' '+getPlaceHolderValue(this.state.finalSelectedOperator,this.state.finalConditionValue);
 
 	addNode(conditionName,'green','white','Conjunction');
 
@@ -248,7 +286,11 @@ submitForm = () => {
 }
 
 generateQuery = () => {
-	alert('asdasd');
+	network.storePositions();
+	let networkData = network.body.data;
+	removeStart(networkData);
+	alert(network.body.data);
+	console.log(networkData)
 }
 
 render(){	
