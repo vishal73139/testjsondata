@@ -89,7 +89,7 @@ export function AsideMenuList({ layoutProps }) {
           data-menu-toggle="hover"
         >
         
-          <NavLink className="menu-link menu-toggle" to="/google-material">
+          <NavLink className="menu-link menu-toggle" to="/exception-summary">
             <span className="svg-icon menu-icon">
               <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Cap-2.svg")} />
             </span>
