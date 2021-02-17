@@ -20,6 +20,7 @@ const counterData = [
 const columns = [
     { id: 'ruleId', label: 'Rule ID' },
     { id: 'tableName', label: 'Table Name' },
+    { id: 'exceptionType', label: 'Exception Type' },
     {
         id: 'attribute',
         label: 'Attribute'
@@ -43,6 +44,7 @@ const rows = [
     {
         ruleId: "DQ_BV_001",
         tableName: "Customer Base",
+        exceptionType: "Business Validation",
         attribute: "city",
         primaryKey: "PAN",
         primaryKeyValue: "AMEUD3967Z",
