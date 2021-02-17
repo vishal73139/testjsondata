@@ -43,17 +43,33 @@ export const SideNavigation = (props) => {
 			            <NavText eventKey="side-menu" eventKey="condition">
 			                <div className="side-menu-header">Condition</div>
 			            </NavText>
-			            <NavItem>
+			            <NavItem eventKey="condition/AND">
 			            	<NavText>
-			            		<div class="legend" def="condition/AND"></div><span class="centerNav">Simple Condition </span>
+			            		<div class="legend" def="simplecon"></div>
+			            		<span class="centerNav">Simple Condition </span>
 			            	</NavText>
 			            </NavItem>
-			            <NavItem>
+			            <NavItem eventKey="condition/OR">
 			            	<NavText>
-			            		<div class="legend" def="condition/OR"></div><span class="centerNav">Currency Condition </span>
+			            		<div class="legend" def="currencycon"></div>
+			            		<span class="centerNav">Currency Condition </span>
+			            	</NavText>
+			            </NavItem> 
+			            <NavItem onClick={()=>props.editComplexConditionModal('DEFAULT_TYPE',false)}>
+			            	<NavText>
+			            		<div class="legend" def="defaultvalue"></div>
+			            		<span class="centerNav">Default Value </span>
 			            	</NavText>
 			            </NavItem> 
 			        </NavItem>  
+
+			        <NavItem eventKey="deleteSelected" onClick={()=>{props.deleteSelected()}}>
+			         	<NavIcon>
+			            <FontAwesomeIcon icon={faTrash} /></NavIcon> 
+			            	<NavText>
+			            		 <div className="side-menu-header">Delete</div>
+			            	</NavText> 
+			         </NavItem> 
 
 			         <NavItem eventKey="edge" onClick={()=>{props.addEdge()}}>
 			         	<NavIcon>
