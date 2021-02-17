@@ -43,12 +43,13 @@ export const SideNavigation = (props) => {
 			            <NavText eventKey="side-menu" eventKey="condition">
 			                <div className="side-menu-header">Condition</div>
 			            </NavText>
-			            <NavItem eventKey="condition/AND">
+			            <NavItem eventKey="condition/AND" onClick={()=>{props.addCondition()}}>
 			            	<NavText>
 			            		<div class="legend" def="simplecon"></div>
-			            		<span class="centerNav">Simple Condition </span>
+			            		<span class="centerNav">Create Condition </span>
 			            	</NavText>
 			            </NavItem>
+			            {/*
 			            <NavItem eventKey="condition/OR">
 			            	<NavText>
 			            		<div class="legend" def="currencycon"></div>
@@ -60,7 +61,8 @@ export const SideNavigation = (props) => {
 			            		<div class="legend" def="defaultvalue"></div>
 			            		<span class="centerNav">Default Value </span>
 			            	</NavText>
-			            </NavItem> 
+			            </NavItem>
+			            */} 
 			        </NavItem>  
 
 			        <NavItem eventKey="deleteSelected" onClick={()=>{props.deleteSelected()}}>

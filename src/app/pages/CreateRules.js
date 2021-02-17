@@ -1,8 +1,10 @@
-import React from "react";
+import React, {Component} from "react";
 import ReactDOM from "react-dom";
 import Graph from "react-graph-vis";
 import {SideNavigation} from "./SideNavigation";
 import swal from 'sweetalert';
+import {Modal,Button} from 'react-bootstrap';
+import _ from 'underscore';
 
 const pushStartNode = (inputNodes,inputEdges) =>{
 	let root_id;
@@ -67,7 +69,7 @@ var staticGraphNodes = [
 		conjunction:'START',
 		margin:15
 	}
-];
+]; 
 
 const addNode = (label,color,fontcolor,type,condition='') => {
 	var nodeData = {
@@ -172,7 +174,68 @@ const deleteNodeValidation = (data,network) => {
 	return callback_status;
 }
 
-export function CreateRules() {
+
+
+
+export default class CreateRules extends Component {
+
+constructor(props){
+	super(props);
+	this.state = {
+		showCreateRuleModal:false,
+		rulesTables:[
+			'customer_base',
+			'ipo_application'
+		],
+		attributeForRule:
+			{
+				customer_base:[
+					'state',
+					'city',
+					'pin'
+				],
+				ipo_application:[
+					'cutoffprice_perlot',
+					'bid_amount_perlot',
+					'total_bid_amount',
+					'is_cutoff_price'
+				]
+			},
+		conditionOperators:[
+			'!=',
+			'==',
+			'>',
+			'<',
+			'>=',
+			'<='
+		],	
+		selectedTablesAttributes:[],
+		finalSelectedTable:'',
+		finalSelectedAttribute:'',
+		finalSelectedOperator:'',
+		finalConditionValue:''
+
+	}
+}	
+
+addCondition = () => {
+	this.setState({showCreateRuleModal:true});
+}
+
+handleClose = () => {
+	this.setState({showCreateRuleModal:false});
+}
+
+handleSave = () => { 
+
+	let conditionName = this.state.finalSelectedTable+'.'+this.state.finalSelectedAttribute+' '+this.state.finalSelectedOperator+' '+this.state.finalConditionValue;
+
+	addNode(conditionName,'green','white','Conjunction');
+
+	this.setState({showCreateRuleModal:false});
+}
+
+render(){	
   const graph = {
     nodes: [
       { id: 1, label: "Node 1", title: "node 1 tootip text" },
@@ -268,6 +331,7 @@ export function CreateRules() {
 	  	 addEdge={addEdge}
 	  	 editComplexConditionModal={editComplexConditionModal}
 	  	 deleteSelected={deleteSelected}
+	  	 addCondition={this.addCondition}
   	 />
   	   <div className="card-body">
 	    <Graph
@@ -279,8 +343,66 @@ export function CreateRules() {
 	        setNetWork(network)
 	      }}
 	    />
+	    <Modal show={this.state.showCreateRuleModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Add Condition</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+          	<select className="select" onChange={(event)=>{
+          		let selectedValue = event.target.value;
+          		let allAttributeValues = this.state.attributeForRule[selectedValue];
+          		this.setState({selectedTablesAttributes:allAttributeValues,finalSelectedTable:selectedValue});
+          	}}>
+          		<option>-- Select Table --</option>
+          		{
+          			_.map(this.state.rulesTables,(value)=>{
+          				return(<option>{value}</option>);
+          			})
+          		} 
+          	</select>
+
+          	<select className="select" onChange={(event)=>{
+          		let selectedValue = event.target.value;
+          		this.setState({finalSelectedAttribute:selectedValue});
+          	}}>
+          		<option>-- Select Attribute --</option>
+          		{
+          			_.map(this.state.selectedTablesAttributes,(value)=>{
+          				return(<option>{value}</option>);
+          			})
+          		}
+          	</select>
+
+          	<select className="select" onChange={(event)=>{
+          		let selectedValue = event.target.value;
+          		this.setState({finalSelectedOperator:selectedValue});
+          	}}>
+          		<option>-- Select Operator --</option> 
+          		{
+          			_.map(this.state.conditionOperators,(value)=>{
+          				return(<option>{value}</option>);
+          			})
+          		}
+          	</select>
+          	<input type="text" onChange={(event)=>{
+          		
+          		let selectedValue = event.target.value;
+          		this.setState({finalConditionValue:selectedValue});
+          	}} />
+          	
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.handleClose}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={this.handleSave}>
+              Save
+            </Button>
+          </Modal.Footer>
+        </Modal>
 	    </div>
     </div>
   );
+}
 }
  
