@@ -1,8 +1,10 @@
-import React from "react";
+import React, {Component} from "react";
 import ReactDOM from "react-dom";
 import Graph from "react-graph-vis";
 import {SideNavigation} from "./SideNavigation";
 import swal from 'sweetalert';
+import {Modal,Button,Form,InputGroup, Col} from 'react-bootstrap';
+import _ from 'underscore';
 
 const pushStartNode = (inputNodes,inputEdges) =>{
 	let root_id;
@@ -67,7 +69,7 @@ var staticGraphNodes = [
 		conjunction:'START',
 		margin:15
 	}
-];
+]; 
 
 const addNode = (label,color,fontcolor,type,condition='') => {
 	var nodeData = {
@@ -172,7 +174,126 @@ const deleteNodeValidation = (data,network) => {
 	return callback_status;
 }
 
-export function CreateRules() {
+const removeStart = (networkData) => {
+	networkData.nodes.remove(0);
+	if(networkData.edges.length !== 0){
+		let edgeid = "0%"+0;
+		networkData.edges.remove(edgeid);
+	}
+}
+
+const getPlaceHolderValue = (operator,val) => {
+	switch(operator){
+		case "Substring":
+			return "Substring ("+val+") ";
+		case "IS NOT":
+		case "IS":
+			return operator+" NULL ";
+		case "IN":
+		case "NOT IN":
+			return operator+" ("+'\''+val.split(',').join('\',\'')+'\''+") ";
+		case "LENGTH <":
+		case "LENGTH <=":
+		case "LENGTH >":
+		case "LENGTH >=":
+		case "<":
+		case "<=":
+		case ">":
+		case ">=":
+			return operator+" "+val+" ";
+		default:
+			return operator+" '"+val+"' ";
+	}
+}
+
+
+export default class CreateRules extends Component {
+
+constructor(props){
+	super(props);
+	this.state = {
+		showCreateRuleModal:false,
+		rulesTables:[
+			'customer_base',
+			'ipo_application'
+		],
+		attributeForRule:
+			{
+				customer_base:[
+					'state',
+					'city',
+					'pin'
+				],
+				ipo_application:[
+					'cutoffprice_perlot',
+					'bid_amount_perlot',
+					'total_bid_amount',
+					'is_cutoff_price'
+				]
+			},
+		conditionOperators:[
+			'!=',
+			'==',
+			'>',
+			'<',
+			'>=',
+			'<=',
+			'IN',
+			'NOT IN',
+			'LENGTH <',
+			'LENGTH <=',
+			'LENGTH >',
+			'LENGTH >=',
+			'IS',
+			'IS NOT'
+		],	
+		selectedTablesAttributes:[],
+		finalSelectedTable:'',
+		finalSelectedAttribute:'',
+		finalSelectedOperator:'',
+		finalConditionValue:'',
+		validated:false,
+		ruleSqlQuery:'',
+		createdRuleName:'',
+		createdRuleDescription:''
+
+	}
+}	
+
+addCondition = () => {
+	this.setState({showCreateRuleModal:true});
+}
+
+handleClose = () => {
+	this.setState({showCreateRuleModal:false});
+}
+
+handleSave = () => { 
+
+	let conditionName = this.state.finalSelectedTable+'.'+this.state.finalSelectedAttribute+' '+getPlaceHolderValue(this.state.finalSelectedOperator,this.state.finalConditionValue);
+
+	addNode(conditionName,'green','white','Conjunction');
+
+	this.setState({showCreateRuleModal:false});
+}
+
+submitForm = () => {
+	if(this.state.createdRuleName == '' || this.state.createdRuleDescription == '')
+		swal("Please Provide Valid Rule name and Description!", {icon:"error"});
+	else
+		this.generateQuery();
+
+}
+
+generateQuery = () => {
+	network.storePositions();
+	let networkData = network.body.data;
+	removeStart(networkData);
+	alert(network.body.data);
+	console.log(networkData)
+}
+
+render(){	
   const graph = {
     nodes: [
       { id: 1, label: "Node 1", title: "node 1 tootip text" },
@@ -261,13 +382,52 @@ export function CreateRules() {
   };
 
   return (
-  	 <div className="card card-custom">
+  	 <div>
+  	  
+  	 <div className="card card-custom" style={{padding:'20px'}}>
+  	 	<div>
+  	 	
+        <Form.Row>
+          <Form.Group as={Col} md="6" controlId="validationCustom01">
+            <Form.Label>Rule name</Form.Label>
+            <Form.Control
+              required
+              type="text"
+              placeholder="Rule name" 
+              onChange={(event)=>{
+          		
+          		let selectedValue = event.target.value;
+          		this.setState({createdRuleName:selectedValue});
+          	}} 
+            /> 
+          </Form.Group>
+          <Form.Group as={Col} md="6" controlId="validationCustom02">
+            <Form.Label>Rule Description</Form.Label>
+            <Form.Control
+              required
+              type="text"
+              placeholder="Rule Description" 
+              onChange={(event)=>{
+          		
+          		let selectedValue = event.target.value;
+          		this.setState({createdRuleDescription:selectedValue});
+          	}} 
+            /> 
+          </Form.Group>
+           
+        </Form.Row>
+      
+      </div>
+  	 </div>
+
+  	 <div className="card card-custom" style={{marginTop:'20px'}}>
   	 <SideNavigation 
 	  	 network={network}
 	  	 addNode={addNode}
 	  	 addEdge={addEdge}
 	  	 editComplexConditionModal={editComplexConditionModal}
 	  	 deleteSelected={deleteSelected}
+	  	 addCondition={this.addCondition}
   	 />
   	   <div className="card-body">
 	    <Graph
@@ -279,8 +439,102 @@ export function CreateRules() {
 	        setNetWork(network)
 	      }}
 	    />
+	    <Modal show={this.state.showCreateRuleModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Add Condition</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+          <Form.Row>
+          <Form.Group as={Col} controlId="formGridState">
+		      <Form.Label>Table Name</Form.Label>
+		      <Form.Control as="select" onChange={(event)=>{
+          		let selectedValue = event.target.value;
+          		let allAttributeValues = this.state.attributeForRule[selectedValue];
+          		this.setState({selectedTablesAttributes:allAttributeValues,finalSelectedTable:selectedValue});
+          	}}>
+		        <option>Choose...</option>
+		       	{
+          			_.map(this.state.rulesTables,(value)=>{
+          				return(<option>{value}</option>);
+          			})
+          		} 
+		      </Form.Control>
+		    </Form.Group>
+		     <Form.Group as={Col} controlId="formGridAttribute">
+		      <Form.Label>Attribute Name</Form.Label>
+		      <Form.Control as="select" onChange={(event)=>{
+          		let selectedValue = event.target.value;
+          		this.setState({finalSelectedAttribute:selectedValue});
+          	}}>
+		        <option>Choose...</option>
+		       {
+          			_.map(this.state.selectedTablesAttributes,(value)=>{
+          				return(<option>{value}</option>);
+          				})
+          		}
+          			
+		      </Form.Control>
+		    </Form.Group>
+		   
+			</Form.Row>
+          	
+          	<Form.Row>
+          		<Form.Group as={Col} controlId="formGridCondition">
+		      <Form.Label>Operator</Form.Label>
+		      <Form.Control as="select" onChange={(event)=>{
+          		let selectedValue = event.target.value;
+          		this.setState({finalSelectedOperator:selectedValue});
+          	}}>
+		        <option>Choose...</option>
+		       	{
+          			_.map(this.state.conditionOperators,(value)=>{
+          				return(<option>{value}</option>);
+          			})
+          		}
+		      </Form.Control>
+		    </Form.Group>
+		     <Form.Group as={Col} controlId="formGridTextCondition">
+	            <Form.Label>Condition</Form.Label>
+	            <Form.Control
+	              required
+	              type="text"
+	              placeholder="Condition" 
+	              onChange={(event)=>{
+          		
+          		let selectedValue = event.target.value;
+          		this.setState({finalConditionValue:selectedValue});
+          	}} 
+	            /> 
+	          </Form.Group> 
+          	</Form.Row>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.handleClose}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={this.handleSave}>
+              Save
+            </Button>
+          </Modal.Footer>
+        </Modal>
 	    </div>
     </div>
+
+    <div className="card card-custom" style={{padding:'20px',marginTop:'20px',textAlign:'center'}}>
+  	 	<div>
+  	 		<Button variant="primary" type="submit">
+			    Show Rule Query
+			 </Button>
+  	 		<Button variant="primary" type="submit" style={{marginLeft:'10px'}} onClick={()=>{
+  	 			this.submitForm();
+  	 		}}>
+			    Create Rule
+			 </Button>
+      	</div>
+  	 </div>
+	 
+    </div>
   );
+}
 }
  

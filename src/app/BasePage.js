@@ -4,7 +4,7 @@ import { LayoutSplashScreen, ContentRoute } from "../_metronic/layout";
 import { BuilderPage } from "./pages/BuilderPage";
 import { MyPage } from "./pages/MyPage";
 import { DashboardPage } from "./pages/DashboardPage";
-import { CreateRules } from "./pages/CreateRules";
+import CreateRules from "./pages/CreateRules";
 import ViewRules from "./pages/ViewRules";
 import ExecuteRules from "./pages/ExecuteRules";
 import ExceptionSummary from "./pages/ExceptionSummary";
