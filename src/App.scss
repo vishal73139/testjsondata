@@ -1,0 +1,38 @@
+.exception-summary-class {
+    .exception-summary-form-class {
+        height: 70px;
+        .exception-summary-form-control {
+            margin-right: 20px;
+            margin-top: 5px;
+            label {
+                position: relative;
+            }
+            label + .MuiInput-formControl {
+                margin-top: 0px;
+                width: 130px;
+            }
+        }
+    }
+    .card-body {
+        height: 100px;
+        display: flex;
+        align-items: center;
+    }
+    .counter-section {
+        text-align: center;
+        height: 100%;
+        cursor: pointer;
+        &:hover {
+            background-color: #eaeaf3;
+        }
+        .counter-section-head {
+            font-size: 35px;
+            font-weight: 700;
+            padding-top: 15px;
+        }
+        .counter-section-body {
+            font-size: 15px;
+            text-transform: capitalize;
+        }
+    }
+}
