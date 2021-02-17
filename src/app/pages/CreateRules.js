@@ -67,19 +67,31 @@ var staticGraphNodes = [
 		},
 		type:'Start',
 		conjunction:'START',
-		margin:15
+		margin:15,
+		tableName:'',
+		attributeName:'',
+		conditionOperator:'',
+		attributeValue:''
 	}
 ]; 
 
-const addNode = (label,color,fontcolor,type,condition='') => {
+const addNode = (label,color,fontcolor,type,condition='',tableName='',attributeName='',conditionOperator='',attributeValue='') => {
 	var nodeData = {
 		id:"xxxxx"+Math.random(),
 		x:-100,
 		y:-300,
-		label:label
+		label:label,
+		tableName:'',
+		attributeName:'',
+		conditionOperator:'',
+		attributeValue:''
 	};
 	nodeData.id=(network.body.data.nodes.max('id') == null)? 1:network.body.data.nodes.max('id').id+1;
-	nodeData = getNodeData(nodeData,'box',color,type,'','','',condition,label,fontcolor);
+	nodeData.tableName='';
+	nodeData.attributeName='';
+	nodeData.conditionOperator='';
+	nodeData.attributeValue='';
+	nodeData = getNodeData(nodeData,'box',color,type,'','','',condition,label,fontcolor,tableName,attributeName,conditionOperator,attributeValue);
 	nodeData.margin = 15;
 	network.body.data.nodes.getDataSet().add(nodeData);
 }
@@ -96,7 +108,7 @@ const setNetWork = (nw) => {
 	network = nw;
 } 
 
-const getNodeData = (nodeData,shape,color,type,entity,attribute,operator,condition,label,fontcolor) => {
+const getNodeData = (nodeData,shape,color,type,entity,attribute,operator,condition,label,fontcolor,tableName,attributeName,conditionOperator,attributeValue) => {
 	nodeData.shape = shape;
 	nodeData.color = color;
 	nodeData.type = type;
@@ -106,6 +118,10 @@ const getNodeData = (nodeData,shape,color,type,entity,attribute,operator,conditi
 	nodeData.condition = condition;
 	nodeData.label = label;
 	nodeData.font = {color:fontcolor}
+	nodeData.tableName=tableName;
+	nodeData.attributeName=attributeName;
+	nodeData.conditionOperator=conditionOperator;
+	nodeData.attributeValue=attributeValue;
 	return nodeData;
 }
 
@@ -255,7 +271,10 @@ constructor(props){
 		validated:false,
 		ruleSqlQuery:'',
 		createdRuleName:'',
-		createdRuleDescription:''
+		createdRuleDescription:'',
+		exceptionTableName:'',
+		exceptionAttributeName:'',
+		exceptionType:''
 
 	}
 }	
@@ -272,7 +291,17 @@ handleSave = () => {
 
 	let conditionName = this.state.finalSelectedTable+'.'+this.state.finalSelectedAttribute+' '+getPlaceHolderValue(this.state.finalSelectedOperator,this.state.finalConditionValue);
 
-	addNode(conditionName,'green','white','Conjunction');
+	addNode(
+		conditionName,
+		'green',
+		'white',
+		'Conjunction',
+		'',
+		this.state.finalSelectedTable.toLowerCase(),
+		this.state.finalSelectedAttribute.toLowerCase(),
+		this.state.finalSelectedOperator,
+		this.state.finalConditionValue
+		);
 
 	this.setState({showCreateRuleModal:false});
 }
@@ -288,9 +317,161 @@ submitForm = () => {
 generateQuery = () => {
 	network.storePositions();
 	let networkData = network.body.data;
-	removeStart(networkData);
+	//removeStart(networkData);
 	alert(network.body.data);
 	console.log(networkData)
+
+	let rowDetails = [];
+	let allNodesValues = networkData.nodes.getDataSet().get();
+	let allEdgesValues = networkData.edges.getDataSet().get();
+
+	if(allNodesValues.length == 0 || allEdgesValues == 0)
+	{
+		swal("Please define relation between nodes and edges", {icon:"error"});
+	}
+	else
+	{
+
+		let nodeSequence = [0];
+		let nodeIndexs=[0];
+		_.map(allNodesValues,(nodeData)=>{
+			if(!nodeIndexs.includes(nodeData.id))
+				nodeIndexs.push(nodeData.id);
+		});
+
+		let allconnectedNodeFromStart = _.filter(allEdgesValues,{from: 0});
+		if(allconnectedNodeFromStart.length > -1)
+		{
+			let nextNode=0;
+			for(var inc=0;inc<allNodesValues.length;inc++){
+				let allconnectedNodeFromStart = _.filter(allEdgesValues,{from: nextNode});
+				let firstValue='';
+				_.map(allconnectedNodeFromStart,(edgeDataNew)=>{
+					console.log("edgeDataNew",edgeDataNew);
+						if(typeof(edgeDataNew.to) !== 'undefined')
+						{
+							if(!nodeSequence.includes(edgeDataNew.to) && typeof(edgeDataNew.to) !== 'undefined'){
+								nodeSequence.push(edgeDataNew.to);
+							}
+							if(firstValue == ''){
+								firstValue = edgeDataNew.to;
+							}
+
+						}
+
+				})
+
+				if(firstValue != '')
+					nextNode = firstValue;
+
+			}
+
+			if(nodeIndexs.length != nodeSequence.length){
+				swal("Please link all nodes with correct edges", {icon:"error"});
+			}
+			else{
+
+				let sqlResult = '';
+				let lastConditionOperator='';
+				let getNextSeq = 0;
+				_.map(nodeSequence,(createSqlQueryDataSql)=>{
+					if(createSqlQueryDataSql != 0)
+					{
+						sqlResult += ' ';
+
+						let tableName = networkData.nodes.getDataSet().get(createSqlQueryDataSql).tableName;
+						let lableName = networkData.nodes.getDataSet().get(createSqlQueryDataSql).label;
+						if(tableName == '')
+							lastConditionOperator = lableName;
+
+						if(getNextSeq > 1){
+
+							let getLastNodeDetailsNodeData = nodeSequence[getNextSeq-1];
+							let getLastNodeDetailsTableName = networkData.nodes.getDataSet().get(getLastNodeDetailsNodeData).tableName;
+							let getLastNodeDetailsLableName = networkData.nodes.getDataSet().get(getLastNodeDetailsNodeData).label;
+							if(tableName != '' && getLastNodeDetailsTableName != ''){
+								sqlResult += lastConditionOperator+' ';
+							}
+
+						}
+						
+						
+						sqlResult += lableName;
+					}
+					getNextSeq = getNextSeq+1;
+				});
+
+				sqlResult = sqlResult.replace(/ +(?= )/g,'');
+
+				// let removeAllStartingAnd = sqlResult.split("AND");
+
+				// if(removeAllStartingAnd[0]==''){
+				// 	removeAllStartingAnd.splice(0,1);
+				// }
+				// if(removeAllStartingAnd[removeAllStartingAnd.length-1]==''){
+				// 	removeAllStartingAnd.splice(removeAllStartingAnd.length-1,1);
+				// }
+
+				// removeAllStartingAnd.join("AND");
+
+				// sqlResult = removeAllStartingAnd;
+
+				// let removeAllStartingOr = sqlResult.split("OR");
+
+				// if(removeAllStartingOr[0]==''){
+				// 	removeAllStartingOr.splice(0,1);
+				// }
+				// if(removeAllStartingOr[removeAllStartingOr.length-1]==''){
+				// 	removeAllStartingOr.splice(removeAllStartingOr.length-1,1);
+				// }
+
+				// removeAllStartingOr.join("AND");
+
+				// sqlResult = removeAllStartingOr;
+
+
+				console.log("sqlResult",sqlResult);
+				console.log("fullQuery","SELECT "+this.state.exceptionAttributeName+" FROM "+this.state.exceptionTableName+" WHERE "+sqlResult);
+			}
+
+			console.log("nodeSequence",nodeSequence);
+			console.log("nodeIndexs",nodeIndexs);
+
+			// 1. Or Operator Should have multuple Nods
+			// 2. Start Node can connect with Direct Condition
+			// 3. Start Node can start with And and Or Operator
+
+
+			// let checkStartNodeIsConnectedCorrectly = false;
+			// _.map(allconnectedNodeFromStart,(data)=>{
+
+			// 	let getLabel = networkData.nodes.getDataSet().get(data.to); 
+			// 	if(getLabel.label == 'AND' || getLabel.label == 'OR' )
+			// 		checkStartNodeIsConnectedCorrectly = true;
+			// });
+
+			// if(checkStartNodeIsConnectedCorrectly)
+			// {
+
+			// }
+			// else{
+			// 	swal("Start Node will only connect with AND and OR Operator", {icon:"error"});
+			// }
+		}
+		else
+		{
+			swal("Please start edges from start Node", {icon:"error"});
+		}
+		
+		console.log(allNodesValues);
+		console.log(allEdgesValues);
+		console.log(allconnectedNodeFromStart);
+	}
+	
+
+
+	
+
 }
 
 render(){	
@@ -416,6 +597,70 @@ render(){
           </Form.Group>
            
         </Form.Row>
+
+        <Form.Row>
+          <Form.Group as={Col} controlId="validationCustom01a">
+            <Form.Label>Exception Type</Form.Label>
+            <Form.Control
+              required
+              as="select"
+              placeholder="Exception Type" 
+              onChange={(event)=>{
+          		
+          		let selectedValue = event.target.value;
+          		this.setState({exceptionType:selectedValue});
+          	}} 
+            >
+            	 <option>Choose...</option>
+            	 <option>Business Validation</option>
+            	 <option>Conformity Check</option>
+		        
+            </Form.Control> 
+          </Form.Group>
+          <Form.Group as={Col} controlId="validationCustom02a">
+            <Form.Label>Entity Name</Form.Label>
+            <Form.Control
+              required
+              as="select"
+              placeholder="Entity Name" 
+              value={this.state.exceptionTableName}
+              onChange={(event)=>{
+          		let selectedValue = event.target.value;
+          		let allAttributeValues = this.state.attributeForRule[selectedValue];
+          		this.setState({selectedTablesAttributes:allAttributeValues,finalSelectedTable:selectedValue,exceptionTableName:selectedValue});
+          	}}
+            >
+            	<option>Choose...</option>
+            	{
+          			_.map(this.state.rulesTables,(value)=>{
+          				return(<option>{value}</option>);
+          			})
+          		} 
+            </Form.Control> 
+          </Form.Group>
+           <Form.Group as={Col} controlId="validationCustom02b">
+            <Form.Label>Attribute Name</Form.Label>
+            <Form.Control
+              required
+              as="select"
+              placeholder="Attribute Name" 
+              value={this.state.exceptionAttributeName}
+              onChange={(event)=>{
+          		let selectedValue = event.target.value;
+          		this.setState({exceptionAttributeName:selectedValue});
+          		}}
+            >
+            	<option>Choose...</option>
+            	{
+          			_.map(this.state.selectedTablesAttributes,(value)=>{
+          				return(<option>{value}</option>);
+          				})
+          		}
+            </Form.Control> 
+          </Form.Group>
+        </Form.Row>
+
+
       
       </div>
   	 </div>
@@ -446,8 +691,10 @@ render(){
           <Modal.Body>
           <Form.Row>
           <Form.Group as={Col} controlId="formGridState">
-		      <Form.Label>Table Name</Form.Label>
-		      <Form.Control as="select" onChange={(event)=>{
+		      <Form.Label>Entity Name</Form.Label>
+		      <Form.Control as="select" 
+		      value={this.state.finalSelectedTable}
+		      onChange={(event)=>{
           		let selectedValue = event.target.value;
           		let allAttributeValues = this.state.attributeForRule[selectedValue];
           		this.setState({selectedTablesAttributes:allAttributeValues,finalSelectedTable:selectedValue});
@@ -462,7 +709,9 @@ render(){
 		    </Form.Group>
 		     <Form.Group as={Col} controlId="formGridAttribute">
 		      <Form.Label>Attribute Name</Form.Label>
-		      <Form.Control as="select" onChange={(event)=>{
+		      <Form.Control as="select" 
+			  value={this.state.finalSelectedAttribute}
+		      onChange={(event)=>{
           		let selectedValue = event.target.value;
           		this.setState({finalSelectedAttribute:selectedValue});
           	}}>
