@@ -5,6 +5,8 @@ import {SideNavigation} from "./SideNavigation";
 import swal from 'sweetalert';
 import {Modal,Button,Form,InputGroup, Col} from 'react-bootstrap';
 import _ from 'underscore';
+import { format } from 'sql-formatter';
+
 
 const pushStartNode = (inputNodes,inputEdges) =>{
 	let root_id;
@@ -309,16 +311,55 @@ handleSave = () => {
 submitForm = () => {
 	if(this.state.createdRuleName == '' || this.state.createdRuleDescription == '')
 		swal("Please Provide Valid Rule name and Description!", {icon:"error"});
-	else
-		this.generateQuery();
+	else{
+		let getSuccess = this.generateQuery();
+	
+			if(getSuccess){
+				this.setState({
+						selectedTablesAttributes:[],
+						finalSelectedTable:'',
+						finalSelectedAttribute:'',
+						finalSelectedOperator:'',
+						finalConditionValue:'',
+						validated:false,
+						ruleSqlQuery:'',
+						createdRuleName:'',
+						createdRuleDescription:'',
+						exceptionTableName:'',
+						exceptionAttributeName:'',
+						exceptionType:''
+					},()=>{
 
+						let networkData = network.body.data;
+						let allNodesValues = networkData.nodes.getDataSet().get();
+						let allEdgesValues = networkData.edges.getDataSet().get();
+
+						_.map(allNodesValues,(nodeData)=>{
+							if(nodeData.label != 'Start'){
+								networkData.nodes.remove(nodeData.id);
+							}
+							
+						});
+
+						_.map(allEdgesValues,(edgeData)=>{
+							networkData.edges.remove(edgeData.id);
+						});
+
+ 
+						swal("Rule Successfully Created!", {icon:"success"});
+					})
+				
+				//alert('asd');
+			}
+		}
 }
 
 generateQuery = () => {
+
 	network.storePositions();
 	let networkData = network.body.data;
 	//removeStart(networkData);
-	alert(network.body.data);
+	//alert(network.body.data);
 	console.log(networkData)
 
 	let rowDetails = [];
@@ -328,6 +369,7 @@ generateQuery = () => {
 	if(allNodesValues.length == 0 || allEdgesValues == 0)
 	{
 		swal("Please define relation between nodes and edges", {icon:"error"});
+		return false;
 	}
 	else
 	{
@@ -368,6 +410,7 @@ generateQuery = () => {
 
 			if(nodeIndexs.length != nodeSequence.length){
 				swal("Please link all nodes with correct edges", {icon:"error"});
+				return false;
 			}
 			else{
 
@@ -431,7 +474,11 @@ generateQuery = () => {
 
 
 				console.log("sqlResult",sqlResult);
-				console.log("fullQuery","SELECT "+this.state.exceptionAttributeName+" FROM "+this.state.exceptionTableName+" WHERE "+sqlResult);
+				let ruleSqlQuery = "SELECT "+this.state.exceptionAttributeName+" FROM "+this.state.exceptionTableName+" WHERE "+sqlResult;
+				console.log("fullQuery",format(ruleSqlQuery));
+				this.setState({ruleSqlQuery});
+				return true;
+
 			}
 
 			console.log("nodeSequence",nodeSequence);
@@ -461,17 +508,13 @@ generateQuery = () => {
 		else
 		{
 			swal("Please start edges from start Node", {icon:"error"});
+			return false;
 		}
 		
 		console.log(allNodesValues);
 		console.log(allEdgesValues);
 		console.log(allconnectedNodeFromStart);
 	}
-	
-
-
-	
-
 }
 
 render(){	
@@ -562,6 +605,13 @@ render(){
     }
   };
 
+  const getFormattedQuery = () => {
+
+  	
+    		return format(this.state.ruleSqlQuery);
+    	
+  }
+
   return (
   	 <div>
   	  
@@ -575,6 +625,7 @@ render(){
               required
               type="text"
               placeholder="Rule name" 
+              value={this.state.createdRuleName}
               onChange={(event)=>{
           		
           		let selectedValue = event.target.value;
@@ -588,6 +639,7 @@ render(){
               required
               type="text"
               placeholder="Rule Description" 
+              value={this.state.createdRuleDescription}
               onChange={(event)=>{
           		
           		let selectedValue = event.target.value;
@@ -605,6 +657,7 @@ render(){
               required
               as="select"
               placeholder="Exception Type" 
+              value={this.state.exceptionType}
               onChange={(event)=>{
           		
           		let selectedValue = event.target.value;
@@ -770,8 +823,13 @@ render(){
     </div>
 
     <div className="card card-custom" style={{padding:'20px',marginTop:'20px',textAlign:'center'}}>
+    <textarea class="form-control" style={{background:"#16212e",marginBottom:'10px',color:'white'}} readonly="" rows="5" value={format(this.state.ruleSqlQuery)}></textarea>
+    	 
+    	 
   	 	<div>
-  	 		<Button variant="primary" type="submit">
+  	 		<Button variant="primary" type="submit" onClick={()=>{
+  	 			this.generateQuery();
+  	 		}}>
 			    Show Rule Query
 			 </Button>
   	 		<Button variant="primary" type="submit" style={{marginLeft:'10px'}} onClick={()=>{
