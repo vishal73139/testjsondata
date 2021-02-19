@@ -6,7 +6,7 @@ import swal from 'sweetalert';
 import {Modal,Button,Form,InputGroup, Col} from 'react-bootstrap';
 import _ from 'underscore';
 import { format } from 'sql-formatter';
-
+import axios from 'axios';
 
 const pushStartNode = (inputNodes,inputEdges) =>{
 	let root_id;
@@ -315,6 +315,22 @@ submitForm = () => {
 		let getSuccess = this.generateQuery();
 	
 			if(getSuccess){
+
+				axios.post('https://datapurereposervicenew.azurewebsites.net/saveRule', {
+								attributeName: this.state.exceptionAttributeName,
+  								extensionType: this.state.exceptionType,
+  								ruleDescription: this.state.createdRuleDescription,
+  								ruleName: this.state.createdRuleName,
+  								sqlQuery: this.state.ruleSqlQuery,
+  								tableName: this.state.exceptionTableName
+				})
+				.then((response) => {
+				  console.log(" API- Success - "+response);
+				}, (error) => {
+				  console.log(" API- ERROR - "+error);
+				});
+						
+
 				this.setState({
 						selectedTablesAttributes:[],
 						finalSelectedTable:'',
@@ -344,6 +360,9 @@ submitForm = () => {
 						_.map(allEdgesValues,(edgeData)=>{
 							networkData.edges.remove(edgeData.id);
 						});
+
+
+						
 
  
 						swal("Rule Successfully Created!", {icon:"success"});
