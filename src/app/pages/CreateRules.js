@@ -286,7 +286,7 @@ constructor(props){
 
 componentDidMount(){
 
-		newAxiosInstance.get('https:datapurereposervicenew.azurewebsites.net/getRules')
+		newAxiosInstance.get('https://datapurereposervicenew.azurewebsites.net/getRules')
 				.then((response) => {
 				  console.log(" API- Success - "+response);
 				}, (error) => {
@@ -328,7 +328,7 @@ submitForm = () => {
 		let getSuccess = this.generateQuery();
 	
 			if(getSuccess){ 
-				newAxiosInstance.post('https:datapurereposervicenew.azurewebsites.net/saveRule', {
+				newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/saveRule', {
 								attributeName: this.state.exceptionAttributeName,
   								extensionType: this.state.exceptionType,
   								ruleDescription: this.state.createdRuleDescription,
