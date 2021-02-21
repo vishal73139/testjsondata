@@ -283,11 +283,7 @@ constructor(props){
 
 componentDidMount(){
 
-		getRules.then((response) => {
-				  console.log(" API- Success - "+response);
-				}, (error) => {
-				  console.log(" API- ERROR - "+error);
-				});
+	
 }
 
 addCondition = () => {
