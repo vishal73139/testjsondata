@@ -6,10 +6,7 @@ import swal from 'sweetalert';
 import {Modal,Button,Form,InputGroup, Col} from 'react-bootstrap';
 import _ from 'underscore';
 import { format } from 'sql-formatter';
-import axios from "axios";
-
-
-const newAxiosInstance = axios.create();
+import {getRules,saveRules} from '../../redux/Httpcalls';
 
 const pushStartNode = (inputNodes,inputEdges) =>{
 	let root_id;
@@ -286,8 +283,7 @@ constructor(props){
 
 componentDidMount(){
 
-		newAxiosInstance.get('https://datapurereposervicenew.azurewebsites.net/getRules')
-				.then((response) => {
+		getRules.then((response) => {
 				  console.log(" API- Success - "+response);
 				}, (error) => {
 				  console.log(" API- ERROR - "+error);
@@ -327,8 +323,8 @@ submitForm = () => {
 	else{
 		let getSuccess = this.generateQuery();
 	
-			if(getSuccess){ 
-				newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/saveRule', {
+			if(getSuccess){  
+				saveRules({
 								attributeName: this.state.exceptionAttributeName,
   								extensionType: this.state.exceptionType,
   								ruleDescription: this.state.createdRuleDescription,
