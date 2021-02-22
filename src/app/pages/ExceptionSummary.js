@@ -2,29 +2,19 @@ import React, { Component, Fragment } from "react";
 import {
     Select, InputLabel, MenuItem, FormControl, ButtonGroup, Button,
     Table, TableHead, TableBody, TableCell, TableContainer, TableFooter, TablePagination, TableRow,
-    Paper
+    Paper, Input
 } from '@material-ui/core';
+import { DataGrid } from '@material-ui/data-grid';
+import { Modal } from 'react-bootstrap';
 import CountUp from "react-countup";
-
-const counterData = [
-    {
-        exceptionType: "Business Validation",
-        count: 16000
-    },
-    {
-        exceptionType: "Conformity Check",
-        count: 1000
-    }
-];
+import { getExceptionType } from '../../redux/Httpcalls';
+import moment from 'moment';
 
 const columns = [
     { id: 'ruleId', label: 'Rule ID' },
     { id: 'tableName', label: 'Table Name' },
     { id: 'exceptionType', label: 'Exception Type' },
-    {
-        id: 'attribute',
-        label: 'Attribute'
-    },
+    { id: 'attribute', label: 'Attribute' },
     {
         id: 'primaryKey',
         label: 'Primary Key'
@@ -40,17 +30,64 @@ const columns = [
     },
 ];
 
-const rows = [
+const adjustmentColumns = [
     {
-        ruleId: "DQ_BV_001",
-        tableName: "Customer Base",
-        exceptionType: "Business Validation",
-        attribute: "city",
-        primaryKey: "PAN",
-        primaryKeyValue: "AMEUD3967Z",
-        count: 4
+        field: "id",
+        headerName: "ID",
+        hide: true,
+        flex: 1
+    },
+    {
+        field: "tableName",
+        headerName: "Table Name",
+        flex: 1
+    },
+    {
+        field: "primaryKey",
+        headerName: "Primary Key",
+        flex: 1
+    },
+    {
+        field: "primaryKeyValue",
+        headerName: "Primary Key Value",
+        flex: 1
+    },
+    {
+        field: "attribute",
+        headerName: "Attribute Name",
+        flex: 1
+    },
+    {
+        field: "attributeOldValue",
+        headerName: "Attribute Old Value",
+        flex: 1
+    },
+    {
+        field: "attributeNewValue",
+        headerName: "Attribute New Value",
+        flex: 1,
+        renderCell: (params) => {
+            const onAdjustmentEdit = (e) => {
+                let obj = {
+                    tableName: params.row.tableName,
+                    priCols: params.row.primaryKey,
+                    priVals: params.row.primaryKeyValue,
+                    oldVal: params.row.attributeOldValue,
+                    newVal: e.target.value,
+                    adjustedTime: moment(new Date()).format("YY-MM-DD hh:mm:ss.SSS"),
+                    expiryDate: moment(new Date()).add(30, 'day').format("YY-MM-DD hh:mm:ss.SSS")
+                };
+                this.setState({
+                    payload: [
+                        ...this.state.payload || [],
+                        obj
+                    ]
+                });
+            }
+            return <Input placeholder="Suggestions" onChange={(e) => onAdjustmentEdit(e)} />
+        }
     }
-];
+]
 
 export default class ExceptionSummary extends Component {
 
@@ -61,7 +98,9 @@ export default class ExceptionSummary extends Component {
             page: 0,
             rowsPerPage: 20,
             showCounter: false,
-            showExceptionSummaryGrid: false
+            showExceptionSummaryGrid: false,
+            counterData: [],
+            exceptionData: []
         }
     }
 
@@ -97,19 +136,41 @@ export default class ExceptionSummary extends Component {
         const value = e.target.value;
         if (value) {
             this.setState({
-                [type]: value
+                [type]: value,
+                showCounter: false,
+                showExceptionSummaryGrid: false
             });
         } else {
             this.setState({
-                [type]: value
+                [type]: value,
+                showCounter: false,
+                showExceptionSummaryGrid: false
             });
         }
     }
 
     onSearchClick() {
         if (this.state.tableName) {
-            this.setState({
-                showCounter: true
+            getExceptionType({ tableName: this.state.tableName }).then((response) => {
+                const res = response.data.reduce((acc, item) => {
+                    acc = {
+                        ...acc,
+                        [item["exceptionType"]]: Number(item.count) + ((acc[item["exceptionType"]]) ? Number(acc[item["exceptionType"]]) : 0)
+                    };
+                    return acc;
+                }, {});
+                const counterData = [];
+                Object.keys(res).forEach((key) => {
+                    counterData.push({
+                        exceptionType: key,
+                        count: res[key]
+                    });
+                });
+                this.setState({
+                    counterData,
+                    showCounter: true,
+                    exceptionData: response.data
+                });
             });
         }
     }
@@ -120,12 +181,16 @@ export default class ExceptionSummary extends Component {
             showExceptionSummaryGrid: false,
             tableName: "",
             page: 0,
-            rowsPerPage: 20
+            rowsPerPage: 20,
+            counterData: [],
+            exceptionData: [],
+            openModal: false
         });
     }
 
-    onCounterClick(e) {
+    onCounterClick(exceptionType) {
         this.setState({
+            selectedRuleType: exceptionType.exceptionType,
             showExceptionSummaryGrid: true
         });
     }
@@ -142,6 +207,28 @@ export default class ExceptionSummary extends Component {
         });
     }
 
+    onGridCount(rowData) {
+        let adjustableRows = [];
+        "a$$b$$c$$d$$e$$f".split("$$").forEach((item) => {
+            adjustableRows.push({
+                id: item,
+                tableName: rowData.tableName,
+                attribute: rowData.attribute,
+                primaryKey: rowData.primaryKey,
+                primaryKeyValue: item,
+                attributeOldValue: 123
+            });
+        });
+        this.setState({
+            openModal: true,
+            adjustableRows
+        });
+    }
+
+    handleClose = () => {
+        this.setState({ openModal: false });
+    }
+
     render() {
         const { page, rowsPerPage } = this.state;
         return (
@@ -156,8 +243,8 @@ export default class ExceptionSummary extends Component {
                                 onChange={(e) => this.onSelectChange(e, "tableName")}
                                 value={this.state.tableName}
                             >
-                                <MenuItem value="Customer Base">Customer Base</MenuItem>
-                                <MenuItem value="IPO Application">IPO Application</MenuItem>
+                                <MenuItem value="customer_base">Customer Base</MenuItem>
+                                <MenuItem value="ipo_application">IPO Application</MenuItem>
                             </Select>
                         </FormControl>
                     </div>
@@ -174,17 +261,18 @@ export default class ExceptionSummary extends Component {
                 {this.state.showCounter &&
                     <div className="row bg-white mt-2 card">
                         <div className="card-header p-3">Exception Type</div>
-                        <div className="card-body p-0 pr-3">
-                            {counterData.map((e, i) => (
-                                <div className={"col-lg-" + 12 / counterData.length + " col-md-" + 12 / counterData.length + " counter-section"} onClick={(e) => this.onCounterClick(e)}>
+                        <div className="card-body p-0">
+                            {this.state.counterData.map((counter) => (
+                                <div className={"col-lg-" + 12 / this.state.counterData.length + " col-md-" + 12 / this.state.counterData.length + " counter-section"}
+                                    onClick={() => this.onCounterClick(counter)}>
                                     <div className="counter-section-head">
                                         <CountUp
                                             duration={3}
-                                            end={this.formatNumber(e.count)[0]}
-                                            suffix={" " + this.formatNumber(e.count)[1]}
+                                            end={this.formatNumber(counter.count)[0]}
+                                            suffix={" " + this.formatNumber(counter.count)[1]}
                                         />
                                     </div>
-                                    <div className="counter-section-body">{e.exceptionType}</div>
+                                    <div className="counter-section-body">{counter.exceptionType}</div>
                                 </div>
                             ))
                             }
@@ -209,7 +297,7 @@ export default class ExceptionSummary extends Component {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                                    {this.state.exceptionData.filter(item => item["exceptionType"] === this.state.selectedRuleType).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
                                         return (
                                             <TableRow hover role="checkbox" tabIndex={-1}>
                                                 {columns.map((column) => {
@@ -220,7 +308,7 @@ export default class ExceptionSummary extends Component {
                                                                 color: "#0078d4",
                                                                 textDecoration: "underline",
                                                                 cursor: "pointer"
-                                                            }}>{value}</a> : value}
+                                                            }} onClick={() => this.onGridCount(row)}>{value}</a> : value}
                                                         </TableCell>
                                                     );
                                                 })}
@@ -235,7 +323,7 @@ export default class ExceptionSummary extends Component {
                             <TablePagination
                                 rowsPerPageOptions={[20, 40, 60, 80, 100]}
                                 component="div"
-                                count={rows.length}
+                                count={this.state.exceptionData.filter(item => item["exceptionType"] === this.state.selectedRuleType).length}
                                 rowsPerPage={rowsPerPage}
                                 page={page}
                                 onChangePage={(e, newPage) => this.onHandlePageChange(e, newPage)}
@@ -244,6 +332,32 @@ export default class ExceptionSummary extends Component {
                         </div>
                     </div>
                 }
+                <div>
+                    <Modal
+                        show={this.state.openModal}
+                        dialogClassName="adjustments-modal"
+                    >
+                        <Modal.Header closeButton>
+                            <Modal.Title>Adjustments</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <div style={{ height: 400, width: '100%' }}>
+                                <DataGrid rows={this.state.adjustableRows} columns={adjustmentColumns} pageSize={5} checkboxSelection />
+                            </div>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <div>
+                                <Button variant="contained" onClick={this.handleClose}>
+                                    Close
+                            </Button>
+                                <Button variant="contained" color="primary" onClick={this.handleSave}>
+                                    Save
+                            </Button>
+                            </div>
+                            <p><strong>Note <sup>:</sup></strong> Expiry of Adjustments is set to default by 30 days from the day it is adjusted.</p>
+                        </Modal.Footer>
+                    </Modal>
+                </div>
             </div>
         );
     }
