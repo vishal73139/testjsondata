@@ -40,7 +40,9 @@ export default class ViewRules extends Component{
 			showExecuteModal:false,
 			executedRuleDetails:{},
 			finalSelectedProcessId:'',
-			finalSelectedVersion:1
+			finalSelectedVersion:1,
+			showViewModal:false,
+
 
 		}
 	}
@@ -91,7 +93,9 @@ export default class ViewRules extends Component{
 		              <StyledTableCell align="center">{row.exceptionTablename}</StyledTableCell>
 		              <StyledTableCell align="center">{row.exceptionAttribute}</StyledTableCell>
 		              <StyledTableCell align="center">{(row.createdDate != null)?row.createdDate.split('T')[0]:''}</StyledTableCell>
-		              <StyledTableCell align="center"><VisibilityOutlinedIcon style={{cursor:'pointer'}}/>&nbsp;&nbsp;&nbsp;<PlayCircleFilledWhiteOutlinedIcon onClick={()=>{
+		              <StyledTableCell align="center"><VisibilityOutlinedIcon style={{cursor:'pointer'}} onClick={()=>{
+		              	this.setState({showViewModal:true,executedRuleDetails:row});
+		              }}/>&nbsp;&nbsp;&nbsp;<PlayCircleFilledWhiteOutlinedIcon onClick={()=>{
 		              	
 
 		              	this.setState({executedRuleDetails:row,showExecuteModal:true});
@@ -152,6 +156,62 @@ export default class ViewRules extends Component{
 		            </Button>
 		          </Modal.Footer>
 		        </Modal>
+
+		        <Modal show={this.state.showViewModal}>
+		          <Modal.Header closeButton>
+		            <Modal.Title>Rule Details</Modal.Title>
+		          </Modal.Header>
+		          <Modal.Body>
+		           <Form.Row>
+		          <Form.Group as={Col} controlId="formGridState">
+				      <Form.Label>Rule Id</Form.Label>
+				      <Form.Control as="input" 
+				      	value={(this.state.executedRuleDetails.ruleId)?this.state.executedRuleDetails.ruleId:''} >
+				      </Form.Control>
+				  </Form.Group>  
+				  <Form.Group as={Col} controlId="formGridState">
+				      <Form.Label>Rule Name</Form.Label>
+				      <Form.Control as="input" 
+				      	value={(this.state.executedRuleDetails.ruleName)?this.state.executedRuleDetails.ruleName:''} >
+				      </Form.Control>
+				  </Form.Group> 
+				  </Form.Row> 
+				    <Form.Row>
+				   <Form.Group as={Col} controlId="formGridState">
+				      <Form.Label>Exception Type</Form.Label>
+				      <Form.Control as="input" 
+				      	value={(this.state.executedRuleDetails.exceptionType)?this.state.executedRuleDetails.exceptionType:''} >
+				      </Form.Control>
+				  </Form.Group>   
+		          <Form.Group as={Col} controlId="formGridState">
+				      <Form.Label>Entity Name</Form.Label>
+				      <Form.Control as="input" 
+				      	value={(this.state.executedRuleDetails.exceptionTablename)?this.state.executedRuleDetails.exceptionTablename:''} >
+				      </Form.Control>
+				  </Form.Group>  
+				  <Form.Group as={Col} controlId="formGridState">
+				      <Form.Label>Attribute Name</Form.Label>
+				      <Form.Control as="input" 
+				      	value={(this.state.executedRuleDetails.exceptionAttribute)?this.state.executedRuleDetails.exceptionAttribute:''} >
+				      </Form.Control>
+				  </Form.Group> 
+				  </Form.Row> 
+		          <Form.Row>
+		          <Form.Group as={Col} controlId="formGridState">
+				      <Form.Label>Rule Query</Form.Label>
+				      <Form.Control as="textarea" 
+				      	value={(this.state.executedRuleDetails.ruleQuery)?this.state.executedRuleDetails.ruleQuery:''} >
+				      </Form.Control>
+				  </Form.Group>  
+				  </Form.Row> 
+		          </Modal.Body>
+		          <Modal.Footer>
+		            <Button variant="secondary" onClick={()=>{this.setState({showViewModal:false})}}>
+		              Close
+		            </Button> 
+		          </Modal.Footer>
+		        </Modal>
+		        
 		    </Paper>
 			);
 	}

@@ -50,7 +50,7 @@ export function AsideMenuList({ layoutProps }) {
         
           <NavLink className="menu-link menu-toggle" to="/create-rules">
             <span className="svg-icon menu-icon">
-              <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Cap-2.svg")} />
+              <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Cap-1.svg")} />
             </span>
             <span className="menu-text">Create Rule</span>
             <i className="menu-arrow" />
@@ -64,6 +64,7 @@ export function AsideMenuList({ layoutProps }) {
             <i className="menu-arrow" />
           </NavLink>
 
+          {/*
           <NavLink className="menu-link menu-toggle" to="/execute-rules">
             <span className="svg-icon menu-icon">
               <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Cap-2.svg")} />
@@ -71,6 +72,7 @@ export function AsideMenuList({ layoutProps }) {
             <span className="menu-text">Execute Rules</span>
             <i className="menu-arrow" />
           </NavLink>
+        */}
 
         </li>
 
@@ -91,7 +93,7 @@ export function AsideMenuList({ layoutProps }) {
         
           <NavLink className="menu-link menu-toggle" to="/exception-summary">
             <span className="svg-icon menu-icon">
-              <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Cap-2.svg")} />
+              <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Cap-3.svg")} />
             </span>
             <span className="menu-text">View Exceptions</span>
             <i className="menu-arrow" />
@@ -116,7 +118,7 @@ export function AsideMenuList({ layoutProps }) {
         
           <NavLink className="menu-link menu-toggle" to="/google-material">
             <span className="svg-icon menu-icon">
-              <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Cap-2.svg")} />
+              <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Brush.svg")} />
             </span>
             <span className="menu-text">Adjust Exceptions</span>
             <i className="menu-arrow" />
