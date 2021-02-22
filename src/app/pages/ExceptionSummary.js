@@ -346,15 +346,15 @@ export default class ExceptionSummary extends Component {
                             </div>
                         </Modal.Body>
                         <Modal.Footer>
-                            <div>
-                                <Button variant="contained" onClick={this.handleClose}>
+                            <div style={{display: "flex", justifyContent: "flex-end"}}>
+                                <Button variant="contained" className="mr-3" onClick={this.handleClose}>
                                     Close
                             </Button>
                                 <Button variant="contained" color="primary" onClick={this.handleSave}>
                                     Save
                             </Button>
                             </div>
-                            <p><strong>Note <sup>:</sup></strong> Expiry of Adjustments is set to default by 30 days from the day it is adjusted.</p>
+                            <p style={{textAlign: "center"}}><strong>Note <sup>:</sup></strong> Expiry of Adjustments is set to default by 30 days from the day it is adjusted.</p>
                         </Modal.Footer>
                     </Modal>
                 </div>
