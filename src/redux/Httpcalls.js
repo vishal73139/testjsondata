@@ -7,3 +7,5 @@ export const getRules = newAxiosInstance.get('https://datapurereposervicenew.azu
 export const saveRules = (postdata) => newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/saveRule',postdata,{"Access-Control-Allow-Origin":"*"});
 
 export const getExceptionType = (postData) => newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/getExceptionType',postData,{"Access-Control-Allow-Origin":"*"});
+
+export const applyAdj = (postData)  => newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/applyAdj',postData,{"Access-Control-Allow-Origin":"*"});

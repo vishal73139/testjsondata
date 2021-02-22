@@ -7,8 +7,10 @@ import {
 import { DataGrid } from '@material-ui/data-grid';
 import { Modal } from 'react-bootstrap';
 import CountUp from "react-countup";
-import { getExceptionType } from '../../redux/Httpcalls';
+import { getExceptionType, applyAdj } from '../../redux/Httpcalls';
 import moment from 'moment';
+
+let gridPayload;
 
 const columns = [
     { id: 'ruleId', label: 'Rule ID' },
@@ -18,10 +20,6 @@ const columns = [
     {
         id: 'primaryKey',
         label: 'Primary Key'
-    },
-    {
-        id: 'primaryKeyValue',
-        label: 'Primary Key Value'
     },
     {
         id: 'count',
@@ -70,6 +68,7 @@ const adjustmentColumns = [
             const onAdjustmentEdit = (e) => {
                 let obj = {
                     tableName: params.row.tableName,
+                    attribute: params.row.attribute,
                     priCols: params.row.primaryKey,
                     priVals: params.row.primaryKeyValue,
                     oldVal: params.row.attributeOldValue,
@@ -77,14 +76,16 @@ const adjustmentColumns = [
                     adjustedTime: moment(new Date()).format("YY-MM-DD hh:mm:ss.SSS"),
                     expiryDate: moment(new Date()).add(30, 'day').format("YY-MM-DD hh:mm:ss.SSS")
                 };
-                this.setState({
-                    payload: [
-                        ...this.state.payload || [],
-                        obj
-                    ]
-                });
+                gridPayload.length === 0 && gridPayload.push(obj);
+                for (let i=0, len = gridPayload.length || 0; i< len; i++) {
+                    if (gridPayload[i].priVals === params.row.primaryKeyValue) {
+                        gridPayload.splice(i, i+1);
+                        break;
+                    }
+                }
+                gridPayload.push(obj);
             }
-            return <Input placeholder="Suggestions" onChange={(e) => onAdjustmentEdit(e)} />
+            return <Input placeholder="Suggestions" onBlur={(e) => onAdjustmentEdit(e)} />
         }
     }
 ]
@@ -94,6 +95,7 @@ export default class ExceptionSummary extends Component {
     constructor(props) {
         super(props);
 
+        gridPayload = [];
         this.state = {
             page: 0,
             rowsPerPage: 20,
@@ -133,6 +135,7 @@ export default class ExceptionSummary extends Component {
     }
 
     onSelectChange(e, type) {
+        gridPayload = [];
         const value = e.target.value;
         if (value) {
             this.setState({
@@ -151,6 +154,7 @@ export default class ExceptionSummary extends Component {
 
     onSearchClick() {
         if (this.state.tableName) {
+            gridPayload = [];
             getExceptionType({ tableName: this.state.tableName }).then((response) => {
                 const res = response.data.reduce((acc, item) => {
                     acc = {
@@ -176,6 +180,7 @@ export default class ExceptionSummary extends Component {
     }
 
     onResetClick() {
+        gridPayload = [];
         this.setState({
             showCounter: false,
             showExceptionSummaryGrid: false,
@@ -189,6 +194,7 @@ export default class ExceptionSummary extends Component {
     }
 
     onCounterClick(exceptionType) {
+        gridPayload = [];
         this.setState({
             selectedRuleType: exceptionType.exceptionType,
             showExceptionSummaryGrid: true
@@ -208,14 +214,16 @@ export default class ExceptionSummary extends Component {
     }
 
     onGridCount(rowData) {
+        gridPayload = [];
         let adjustableRows = [];
-        "a$$b$$c$$d$$e$$f".split("$$").forEach((item) => {
+        let pkValues = rowData.primaryKeyValue.replace("]", "").replace("[", "");
+        pkValues.split(",").forEach((item) => {
             adjustableRows.push({
-                id: item,
+                id: item.trim(),
                 tableName: rowData.tableName,
                 attribute: rowData.attribute,
                 primaryKey: rowData.primaryKey,
-                primaryKeyValue: item,
+                primaryKeyValue: item.trim(),
                 attributeOldValue: 123
             });
         });
@@ -227,6 +235,20 @@ export default class ExceptionSummary extends Component {
 
     handleClose = () => {
         this.setState({ openModal: false });
+    }
+
+    handleSave = () => {
+        applyAdj(this.state.applyAdjPayload).then(res => console.log(res));
+    }
+
+    setSelectionModel = (newSelection) => {
+        console.log(newSelection, gridPayload);
+        var g = gridPayload.filter(g => {
+            return newSelection.selectionModel.indexOf(g.priVals) > -1;
+        });
+        this.setState({
+            applyAdjPayload: g
+        });
     }
 
     render() {
@@ -244,7 +266,7 @@ export default class ExceptionSummary extends Component {
                                 value={this.state.tableName}
                             >
                                 <MenuItem value="customer_base">Customer Base</MenuItem>
-                                <MenuItem value="ipo_application">IPO Application</MenuItem>
+                                <MenuItem value="ipo_applications">IPO Application</MenuItem>
                             </Select>
                         </FormControl>
                     </div>
@@ -263,7 +285,9 @@ export default class ExceptionSummary extends Component {
                         <div className="card-header p-3">Exception Type</div>
                         <div className="card-body p-0">
                             {this.state.counterData.map((counter) => (
-                                <div className={"col-lg-" + 12 / this.state.counterData.length + " col-md-" + 12 / this.state.counterData.length + " counter-section"}
+                                <div className={"col-lg-" + 12 / this.state.counterData.length + 
+                                " col-md-" + 12 / this.state.counterData.length + " counter-section" + 
+                                (counter.exceptionType === this.state.selectedRuleType ? " counter-active" : " ")}
                                     onClick={() => this.onCounterClick(counter)}>
                                     <div className="counter-section-head">
                                         <CountUp
@@ -342,11 +366,20 @@ export default class ExceptionSummary extends Component {
                         </Modal.Header>
                         <Modal.Body>
                             <div style={{ height: 400, width: '100%' }}>
-                                <DataGrid rows={this.state.adjustableRows} columns={adjustmentColumns} pageSize={5} checkboxSelection />
+                                <DataGrid
+                                    rows={this.state.adjustableRows}
+                                    columns={adjustmentColumns.map((column) => ({
+                                        ...column,
+                                        disableClickEventBubbling: true,
+                                    }))}
+                                    pageSize={5}
+                                    checkboxSelection
+                                    onSelectionModelChange={(newSelection) => this.setSelectionModel(newSelection)}
+                                />
                             </div>
                         </Modal.Body>
                         <Modal.Footer>
-                            <div style={{display: "flex", justifyContent: "flex-end"}}>
+                            <div style={{ display: "flex", justifyContent: "flex-end" }}>
                                 <Button variant="contained" className="mr-3" onClick={this.handleClose}>
                                     Close
                             </Button>
@@ -354,7 +387,7 @@ export default class ExceptionSummary extends Component {
                                     Save
                             </Button>
                             </div>
-                            <p style={{textAlign: "center"}}><strong>Note <sup>:</sup></strong> Expiry of Adjustments is set to default by 30 days from the day it is adjusted.</p>
+                            <p style={{ textAlign: "center" }}><strong>Note <sup>:</sup></strong> Expiry of Adjustments is set to default by 30 days from the day it is adjusted.</p>
                         </Modal.Footer>
                     </Modal>
                 </div>

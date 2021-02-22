@@ -35,6 +35,9 @@
             text-transform: capitalize;
         }
     }
+    .counter-active {
+        border-bottom: 2px solid #1e1e2d
+    }
 }
 .adjustments-modal {
     max-width: 90% !important;
