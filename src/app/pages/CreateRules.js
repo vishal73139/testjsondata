@@ -233,26 +233,25 @@ constructor(props){
 		showCreateRuleModal:false,
 		rulesTables:[
 			'customer_base',
-			'ipo_application'
+			'ipo_applications'
 		],
 		attributeForRule:
 			{
 				customer_base:[
-					'state',
+					'stateName',
 					'city',
 					'pin'
 				],
-				ipo_application:[
+				ipo_applications:[
 					'cutoffprice_perlot',
 					'bid_amount_perlot',
-					'total_bid_amount',
-					'is_cutoff_price'
+					'total_bid_amount'
 				]
 			},
 		conditionOperators:[
 			'!=',
-			'==',
-			'>',
+			'=',
+			'>', 
 			'<',
 			'>=',
 			'<=',
