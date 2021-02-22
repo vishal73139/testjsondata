@@ -77,9 +77,9 @@ const adjustmentColumns = [
                     expiryDate: moment(new Date()).add(30, 'day').format("YY-MM-DD hh:mm:ss.SSS")
                 };
                 gridPayload.length === 0 && gridPayload.push(obj);
-                for (let i=0, len = gridPayload.length || 0; i< len; i++) {
+                for (let i = 0, len = gridPayload.length || 0; i < len; i++) {
                     if (gridPayload[i].priVals === params.row.primaryKeyValue) {
-                        gridPayload.splice(i, i+1);
+                        gridPayload.splice(i, i + 1);
                         break;
                     }
                 }
@@ -238,7 +238,7 @@ export default class ExceptionSummary extends Component {
     }
 
     handleSave = () => {
-        applyAdj(this.state.applyAdjPayload).then(res => console.log(res));
+        applyAdj(this.state.applyAdjPayload).then(res => console.log(res)).catch(err => console.log(err));
     }
 
     setSelectionModel = (newSelection) => {
@@ -280,14 +280,14 @@ export default class ExceptionSummary extends Component {
                     </div>
                 </div>
 
-                {this.state.showCounter &&
+                {this.state.showCounter && this.state.counterData.length ?
                     <div className="row bg-white mt-2 card">
                         <div className="card-header p-3">Exception Type</div>
                         <div className="card-body p-0">
                             {this.state.counterData.map((counter) => (
-                                <div className={"col-lg-" + 12 / this.state.counterData.length + 
-                                " col-md-" + 12 / this.state.counterData.length + " counter-section" + 
-                                (counter.exceptionType === this.state.selectedRuleType ? " counter-active" : " ")}
+                                <div className={"col-lg-" + 12 / this.state.counterData.length +
+                                    " col-md-" + 12 / this.state.counterData.length + " counter-section" +
+                                    (counter.exceptionType === this.state.selectedRuleType ? " counter-active" : " ")}
                                     onClick={() => this.onCounterClick(counter)}>
                                     <div className="counter-section-head">
                                         <CountUp
@@ -302,6 +302,7 @@ export default class ExceptionSummary extends Component {
                             }
                         </div>
                     </div>
+                    : this.state.showCounter && <p className="text-primary text-center mt-4">No Exceptions are availble.</p>
                 }
                 {this.state.showCounter && this.state.showExceptionSummaryGrid &&
                     <div className="row mt-2">
