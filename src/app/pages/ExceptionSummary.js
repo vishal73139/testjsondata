@@ -347,10 +347,10 @@ export default class ExceptionSummary extends Component {
                         </Modal.Body>
                         <Modal.Footer>
                             <div>
-                                <Button variant="secondary" onClick={this.handleClose}>
+                                <Button variant="contained" onClick={this.handleClose}>
                                     Close
                             </Button>
-                                <Button variant="primary" onClick={this.handleSave}>
+                                <Button variant="contained" color="primary" onClick={this.handleSave}>
                                     Save
                             </Button>
                             </div>
