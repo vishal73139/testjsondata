@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import Graph from "react-graph-vis";
 import {SideNavigation} from "./SideNavigation";
 import swal from 'sweetalert';
-import {Modal,Button,Form,InputGroup, Col} from 'react-bootstrap';
+import {Modal,Button,Form,InputGroup, Col, Badge} from 'react-bootstrap';
 import _ from 'underscore';
 import { format } from 'sql-formatter';
 import {getRules,saveRules} from '../../redux/Httpcalls';
@@ -295,7 +295,13 @@ handleClose = () => {
 
 handleSave = () => { 
 
-	let conditionName = this.state.finalSelectedTable+'.'+this.state.finalSelectedAttribute+' '+getPlaceHolderValue(this.state.finalSelectedOperator,this.state.finalConditionValue);
+	let whereConditions = getPlaceHolderValue(this.state.finalSelectedOperator,this.state.finalConditionValue);
+
+	if(this.state.finalConditionValue == 'NULL'){
+		whereConditions = this.state.finalSelectedOperator+" NULL ";
+	}
+
+	let conditionName = this.state.finalSelectedTable+'.'+this.state.finalSelectedAttribute+' '+whereConditions;
 
 	addNode(
 		conditionName,
@@ -496,7 +502,16 @@ generateQuery = () => {
 
 
 				console.log("sqlResult",sqlResult);
-				let ruleSqlQuery = "SELECT "+this.state.exceptionAttributeName+" FROM "+this.state.exceptionTableName+" WHERE "+sqlResult;
+				let primary_key = ''
+				if(this.state.exceptionTableName == 'customer_base'){
+					primary_key = 'PAN,'
+				}
+
+				if(this.state.exceptionTableName == 'ipo_applications'){
+					primary_key = 'ipo_application_number,'
+				}
+
+				let ruleSqlQuery = "SELECT "+primary_key+" "+this.state.exceptionAttributeName+" FROM "+this.state.exceptionTableName+" WHERE "+sqlResult;
 				console.log("fullQuery",format(ruleSqlQuery));
 				this.setState({ruleSqlQuery});
 				return true;
