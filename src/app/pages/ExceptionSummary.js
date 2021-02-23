@@ -8,7 +8,7 @@ import { DataGrid } from '@material-ui/data-grid';
 import { Modal } from 'react-bootstrap';
 import CountUp from "react-countup";
 import {
-    getExceptionType, applyAdj, getMetadata,
+    getExceptionType, applyAdj, getMetadata, getStgApi,
     getAdjSuggestionsForCustomerBase, getAdjSuggestionsForIpoApplication
 } from '../../redux/Httpcalls';
 import moment from 'moment';
@@ -66,16 +66,8 @@ const adjustmentColumns = [
     },
     {
         field: "attributeValueSuggestion",
-        headerName: "AI/ML Suggestion",
-        flex: 1,
-        renderCell: (params) => {
-            if (params.row.tableName === "customer_base") {
-                getAdjSuggestionsForCustomerBase({data: [[5, 172, 1800000]]}).then(res => console.log(res));
-            } else {
-                getAdjSuggestionsForIpoApplication().then(res => console.log(res));
-            }
-            return "gold"
-        }
+        headerName: "AI Suggestion",
+        flex: 1
     },
     {
         field: "attributeNewValue",
@@ -103,7 +95,7 @@ const adjustmentColumns = [
                 }
                 gridPayload.push(obj);
             }
-            return <Input placeholder="Suggestions" onBlur={(e) => onAdjustmentEdit(e)} />
+            return <Input placeholder="Enter New Value" onBlur={(e) => onAdjustmentEdit(e)} />
         }
     }
 ];
@@ -265,21 +257,81 @@ export default class ExceptionSummary extends Component {
         gridPayload = [];
         let adjustableRows = [];
         let pkValues = rowData.primaryKeyValue.replace("]", "").replace("[", "");
+        let count = Number(rowData.count);
         pkValues.split(",").forEach((item) => {
-            adjustableRows.push({
-                id: item.trim().split("&&")[0],
-                tableName: rowData.tableName,
-                attribute: rowData.attribute,
-                primaryKey: rowData.primaryKey,
-                primaryKeyValue: item.trim().split("&&")[0],
-                attributeOldValue: item.trim().split("&&")[1],
-                processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
-                version: rowData.version
-            });
-        });
-        this.setState({
-            openModal: true,
-            adjustableRows
+            if (rowData.tableName === "customer_base") {
+                getStgApi({
+                    primaryKey: rowData.primaryKey,
+                    primaryKeyValue: item.trim().split("&&")[0],
+                    processDate: moment(rowData.processDate).format("M/DD/YYYY"),
+                    tableName: rowData.tableName,
+                    versionId: Number(rowData.version)
+                }).then(res => {
+                    console.log(res.data);
+                    const filterColumn = aiMlColumns.find(a => a.tableName === rowData.tableName);
+                    let aiPayload = [];
+                    filterColumn.attributeListForSuggestion.forEach(e => {
+                        aiPayload.push(res.data[0][e]);
+                    });
+                    // getAdjSuggestionsForCustomerBase({data: [aiPayload]}).then(res => {
+                        adjustableRows.push({
+                            id: item.trim().split("&&")[0],
+                            tableName: rowData.tableName,
+                            attribute: rowData.attribute,
+                            primaryKey: rowData.primaryKey,
+                            primaryKeyValue: item.trim().split("&&")[0],
+                            attributeOldValue: item.trim().split("&&")[1],
+                            processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
+                            version: rowData.version,
+                            attributeValueSuggestion: "gold"
+                        });
+
+                        if (count === adjustableRows.length) {
+                            this.setState({
+                                openModal: true,
+                                adjustableRows
+                            });
+                        }
+                        
+                    // });
+                });
+            } else {
+                getStgApi({
+                    primaryKey: rowData.primaryKey,
+                    primaryKeyValue: item.trim().split("&&")[0],
+                    processDate: moment(rowData.processDate).format("M/DD/YYYY"),
+                    tableName: rowData.tableName,
+                    versionId: Number(rowData.version)
+                }).then(res => {
+                    console.log(res.data);
+                    const filterColumn = aiMlColumns.find(a => a.tableName === rowData.tableName);
+                    let aiPayload = [];
+                    filterColumn.attributeListForSuggestion.forEach(e => {
+                        aiPayload.push(res.data[0][e]);
+                    });
+                    // getAdjSuggestionsForIpoApplication({data: [aiPayload]}).then(res => {
+                        adjustableRows.push({
+                            id: item.trim().split("&&")[0],
+                            tableName: rowData.tableName,
+                            attribute: rowData.attribute,
+                            primaryKey: rowData.primaryKey,
+                            primaryKeyValue: item.trim().split("&&")[0],
+                            attributeOldValue: item.trim().split("&&")[1],
+                            processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
+                            version: rowData.version,
+                            attributeValueSuggestion: "gold"
+                        });
+
+                        if (count === adjustableRows.length) {
+                            this.setState({
+                                openModal: true,
+                                adjustableRows
+                            });
+                        }
+                        
+                    // });
+                });
+            }
         });
     }
 
