@@ -109,7 +109,7 @@ const adjustmentColumns = [
 ];
 
 const aiMlColumns = [{
-    tableName: "ipo_applications",
+    tableName: "v_ipo_applications",
     attributeValueMap: {
         1: "INDIGO PAINTS",
         2: "IRFC",
@@ -119,7 +119,7 @@ const aiMlColumns = [{
     attributeListForSuggestion: ["cutoffprice_perlot", "numberOf_lots", "bid_amount_perlot"],
     excepAttribute: "ipo_name"
 }, {
-    tableName: "customer_base",
+    tableName: "v_customer_base",
     attributeValueMap: {
         1: "silver",
         2: "gold",
@@ -272,7 +272,7 @@ export default class ExceptionSummary extends Component {
         let count = Number(rowData.count);
         pkValues.split(",").forEach((item) => {
             let filterColumn;
-            if (rowData.tableName === "customer_base") {
+            if (rowData.tableName === "v_customer_base") {
                 getStgApi({
                     primaryKey: rowData.primaryKey,
                     primaryKeyValue: item.trim().split("&&")[0],
@@ -508,7 +508,7 @@ export default class ExceptionSummary extends Component {
                             <Modal.Title>Adjustments</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
-                            <div style={{ height: 350, width: '100%' }}>
+                            <div style={{ height: 400, width: '100%' }}>
                                 <DataGrid
                                     rows={this.state.adjustableRows}
                                     columns={adjustmentColumns.map((column) => ({
