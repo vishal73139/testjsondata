@@ -373,7 +373,7 @@ export default class ExceptionSummary extends Component {
                                 value={this.state.processDate}
                             >
                                 {
-                                    this.state.metaData.map(m => (
+                                    [...new Set(this.state.metaData.map(item => item))].map(m => (
                                         <MenuItem value={m.processDate}>{m.processDate}</MenuItem>
                                     ))
                                 }
