@@ -373,7 +373,7 @@ export default class ExceptionSummary extends Component {
                             >
                                 {
                                     [...new Set(this.state.metaData.map(item => item.processDate))].map(m => (
-                                        <MenuItem value={m}>{m}</MenuItem>
+                                        <MenuItem value={m}>{moment(m).format("DD-MMM-YYYY").toUpperCase()}</MenuItem>
                                     ))
                                 }
                             </Select>
