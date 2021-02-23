@@ -14,9 +14,9 @@ export const getExceptionType = (postData) => newAxiosInstance.post('https://dat
 
 export const getMetadata = () => newAxiosInstance.get('https://datapurereposervicenew.azurewebsites.net/getMetadata',{"Access-Control-Allow-Origin":"*"});
 
-export const getAdjSuggestionsForCustomerBase = (postData) => newAxiosInstance.post('http://mlapimgmtsvc.azure-api.net/IPOPredict/score',postData,{"Access-Control-Allow-Origin":"*"});
+export const getAdjSuggestionsForCustomerBase = (postData) => newAxiosInstance.post('https://mlapimgmtsvc.azure-api.net/CustomerClassPredict/score',postData,{"Access-Control-Allow-Origin":"*"});
 
-export const getAdjSuggestionsForIpoApplication = (postData) => newAxiosInstance.post('http://dcadb623-06f5-4611-8103-42bb077a8f0d.eastus2.azurecontainer.io/score',postData,{"Access-Control-Allow-Origin":"*"});
+export const getAdjSuggestionsForIpoApplication = (postData) => newAxiosInstance.post('http://mlapimgmtsvc.azure-api.net/IPOPredict/score',postData,{"Access-Control-Allow-Origin":"*"});
 
 export const getStgApi = (postData) => newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/stageApi',postData,{"Access-Control-Allow-Origin":"*"});
 

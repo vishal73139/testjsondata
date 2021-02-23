@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react";
 import {
     Select, InputLabel, MenuItem, FormControl, ButtonGroup, Button,
     Table, TableHead, TableBody, TableCell, TableContainer, TableFooter, TablePagination, TableRow,
-    Paper, Input
+    Paper, Input, Tooltip, CircularProgress
 } from '@material-ui/core';
 import { DataGrid } from '@material-ui/data-grid';
 import { Modal } from 'react-bootstrap';
@@ -67,7 +67,15 @@ const adjustmentColumns = [
     {
         field: "attributeValueSuggestion",
         headerName: "AI Suggestion",
-        flex: 1
+        flex: 1,
+        renderCell: (params) => {
+            const title = `Suggestion based on coulmns ${aiMlColumns.find(a => params.row.tableName === a.tableName).attributeListForSuggestion}`
+            return (
+                <Tooltip title={title}>
+                    <span>{params.row.attributeValueSuggestion}</span>
+                </Tooltip>
+            )
+        }
     },
     {
         field: "attributeNewValue",
@@ -134,7 +142,8 @@ export default class ExceptionSummary extends Component {
             showExceptionSummaryGrid: false,
             counterData: [],
             exceptionData: [],
-            metaData: []
+            metaData: [],
+            showLoading: false
         }
     }
 
@@ -254,11 +263,15 @@ export default class ExceptionSummary extends Component {
     }
 
     onGridCount(rowData) {
+        this.setState({
+            showLoading: true
+        });
         gridPayload = [];
         let adjustableRows = [];
         let pkValues = rowData.primaryKeyValue.replace("]", "").replace("[", "");
         let count = Number(rowData.count);
         pkValues.split(",").forEach((item) => {
+            let filterColumn;
             if (rowData.tableName === "customer_base") {
                 getStgApi({
                     primaryKey: rowData.primaryKey,
@@ -267,13 +280,14 @@ export default class ExceptionSummary extends Component {
                     tableName: rowData.tableName,
                     versionId: Number(rowData.version)
                 }).then(res => {
-                    console.log(res.data);
-                    const filterColumn = aiMlColumns.find(a => a.tableName === rowData.tableName);
+                    filterColumn = aiMlColumns.find(a => a.tableName === rowData.tableName);
                     let aiPayload = [];
                     filterColumn.attributeListForSuggestion.forEach(e => {
                         aiPayload.push(res.data[0][e]);
                     });
                     getAdjSuggestionsForCustomerBase({ data: [aiPayload] }).then(res => {
+                        console.log("AI response", res.data);
+                        const aiSuggestion = filterColumn.attributeValueMap[res.data[0]];
                         adjustableRows.push({
                             id: item.trim().split("&&")[0],
                             tableName: rowData.tableName,
@@ -283,13 +297,14 @@ export default class ExceptionSummary extends Component {
                             attributeOldValue: item.trim().split("&&")[1],
                             processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
                             version: rowData.version,
-                            attributeValueSuggestion: "gold"
+                            attributeValueSuggestion: aiSuggestion
                         });
 
                         if (count === adjustableRows.length) {
                             this.setState({
                                 openModal: true,
-                                adjustableRows
+                                adjustableRows,
+                                showLoading: false
                             });
                         }
 
@@ -303,13 +318,13 @@ export default class ExceptionSummary extends Component {
                     tableName: rowData.tableName,
                     versionId: Number(rowData.version)
                 }).then(res => {
-                    console.log(res.data);
-                    const filterColumn = aiMlColumns.find(a => a.tableName === rowData.tableName);
+                    filterColumn = aiMlColumns.find(a => a.tableName === rowData.tableName);
                     let aiPayload = [];
                     filterColumn.attributeListForSuggestion.forEach(e => {
                         aiPayload.push(res.data[0][e]);
                     });
                     getAdjSuggestionsForIpoApplication({ data: [aiPayload] }).then(res => {
+                        const aiSuggestion = filterColumn.attributeValueMap[res.data[0]];
                         adjustableRows.push({
                             id: item.trim().split("&&")[0],
                             tableName: rowData.tableName,
@@ -319,7 +334,7 @@ export default class ExceptionSummary extends Component {
                             attributeOldValue: item.trim().split("&&")[1],
                             processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
                             version: rowData.version,
-                            attributeValueSuggestion: "gold"
+                            attributeValueSuggestion: aiSuggestion
                         });
 
                         if (count === adjustableRows.length) {
@@ -518,6 +533,9 @@ export default class ExceptionSummary extends Component {
                             <p style={{ textAlign: "center" }}><strong>Note: </strong> Expiry of Adjustments is set to default by 30 days from the day it is adjusted.</p>
                         </Modal.Footer>
                     </Modal>
+                </div>
+                <div className={"loading " + (this.state.showLoading ? "loading-show" : "loading-hide")}>
+                    <CircularProgress />
                 </div>
             </div>
         );
