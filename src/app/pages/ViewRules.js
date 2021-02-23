@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {getRules,executeRules} from '../../redux/Httpcalls';
+import {getRules,executeRules,reApplyAdj} from '../../redux/Httpcalls';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import _ from 'underscore';
 import Table from '@material-ui/core/Table';
@@ -12,6 +12,7 @@ import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
 import PlayCircleFilledWhiteOutlinedIcon from '@material-ui/icons/PlayCircleFilledWhiteOutlined';
 import {Modal,Button,Form,InputGroup, Col, Badge} from 'react-bootstrap';
 import swal from 'sweetalert';
+import moment from 'moment';
 
 const StyledTableCell = withStyles(theme => ({
   head: {
@@ -40,10 +41,9 @@ export default class ViewRules extends Component{
 			showExecuteModal:false,
 			executedRuleDetails:{},
 			finalSelectedProcessId:'',
-			finalSelectedVersion:1,
+			finalSelectedVersion:0,
 			showViewModal:false,
-
-
+			processDateArray:['2/16/2021']
 		}
 	}
 
@@ -58,13 +58,22 @@ export default class ViewRules extends Component{
 
 	handleExcuateRule = () => {
 		let selectedRules = this.state.executedRuleDetails; 
-		this.setState({showExecuteModal:false},()=>{
-			executeRules(this.state.finalSelectedProcessId,selectedRules.ruleId,this.state.finalSelectedVersion).then((response) => {
-					 swal("Rule Successfully Executed and Found "+response.data+" Exceptions .!", {icon:"success"});
-					}, (error) => { 
+		let reAdjuctObject = {
+				  "processDate": moment(this.state.finalSelectedProcessId).format("DD-MMM-YYYY").toUpperCase(),
+				  "version": this.state.finalSelectedVersion
+				};
+
+		reApplyAdj(reAdjuctObject).then((response) => {
+			this.setState({showExecuteModal:false},()=>{
+				executeRules(this.state.finalSelectedProcessId,selectedRules.ruleId,this.state.finalSelectedVersion).then((response) => {
+						 swal("Rule Successfully Executed and Found "+response.data+" Exceptions .!", {icon:"success"});
+						}, (error) => { 
+						 swal("Something went wrong.!", {icon:"error"}); 
+						});
+			});
+		}, (error) => { 
 					 swal("Something went wrong.!", {icon:"error"}); 
 					});
-		});
 	}
 
 	render(){
@@ -125,7 +134,11 @@ export default class ViewRules extends Component{
 						          	}} 
 				      	>
 				        <option>Choose...</option>
-				        <option>16-FEB-2021</option>
+				        {
+				        	_.map(this.state.processDateArray,(comingProcessId)=>{
+				        		return <option value={comingProcessId}> {moment(comingProcessId).format("DD-MMM-YYYY").toUpperCase() }</option>
+				        	})
+				        } 
 				      </Form.Control>
 				    </Form.Group> 
 
@@ -140,6 +153,7 @@ export default class ViewRules extends Component{
 						          	}} 
 				      	>
 				        <option>Choose...</option>
+				        <option>0</option>
 				        <option>1</option>
 				        <option>2</option>
 				      </Form.Control>
@@ -151,7 +165,7 @@ export default class ViewRules extends Component{
 		            <Button variant="secondary" onClick={()=>{this.setState({finalSelectedProcessId:'',finalSelectedVersion:1,showExecuteModal:false})}}>
 		              Close
 		            </Button>
-		            <Button variant="primary" onClick={this.handleExcuateRule}>
+		            <Button variant="primary" onClick={()=>{this.handleExcuateRule()}}>
 		              Execute
 		            </Button>
 		          </Modal.Footer>
