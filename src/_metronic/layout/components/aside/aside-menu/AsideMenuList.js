@@ -33,7 +33,27 @@ export function AsideMenuList({ layoutProps }) {
         </li>
         {/*end::1 Level*/}
 
+      {/* RMS Code */} 
 
+        <li className="menu-section ">
+          <h4 className="menu-text">Upstream Feeds</h4>
+          <i className="menu-icon flaticon-more-v2"></i>
+        </li>
+         <li
+          className={`menu-item menu-item-submenu`}
+          aria-haspopup="true"
+          data-menu-toggle="hover"
+        >
+        
+          <NavLink className="menu-link menu-toggle" to="/injection">
+            <span className="svg-icon menu-icon">
+              <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Join-1.svg")} />
+            </span>
+            <span className="menu-text">Inject Datasource</span>
+            <i className="menu-arrow" />
+          </NavLink>
+         </li>
+      {/* RMS Code */} 
 
       {/* RMS Code */} 
 

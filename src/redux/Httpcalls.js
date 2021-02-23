@@ -23,3 +23,14 @@ export const getStgApi = (postData) => newAxiosInstance.post('https://datapurere
 export const reApplyAdj = (postData)  => newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/reApplyAdj',postData,{"Access-Control-Allow-Origin":"*"});
 
 export const getProcessDateAndVersion = (tableName) => newAxiosInstance.get('https://datapurereposervicenew.azurewebsites.net/getAllProcessDate?tableName='+tableName);
+
+export const getTableStageData = (tableName,processDate,versionId) => {
+	let url = 'https://datapurereposervicenew.azurewebsites.net/getStageData?tableName='+tableName;
+	if(processDate != ''){
+		url +='&processDate='+processDate;
+		if(versionId != ''){
+			url +='&version='+versionId;
+		}
+	}
+	return newAxiosInstance.get(url);
+}
