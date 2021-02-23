@@ -244,6 +244,7 @@ constructor(props){
 					'cust_classification'
 				],
 				v_ipo_applications:[
+					'ipo_name',
 					'cutoffprice_perlot',
 					'bid_amount_perlot',
 					'total_bid_amount'
