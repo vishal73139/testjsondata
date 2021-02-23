@@ -19,3 +19,5 @@ export const getAdjSuggestionsForCustomerBase = (postData) => newAxiosInstance.p
 export const getAdjSuggestionsForIpoApplication = (postData) => newAxiosInstance.post('http://dcadb623-06f5-4611-8103-42bb077a8f0d.eastus2.azurecontainer.io/score',postData,{"Access-Control-Allow-Origin":"*"});
 
 export const getStgApi = (postData) => newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/stageApi',postData,{"Access-Control-Allow-Origin":"*"});
+
+export const reApplyAdj = (postData)  => newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/reApplyAdj',postData,{"Access-Control-Allow-Origin":"*"});
