@@ -240,7 +240,8 @@ constructor(props){
 				customer_base:[
 					'stateName',
 					'city',
-					'pin'
+					'pin',
+					'cust_classification'
 				],
 				ipo_applications:[
 					'cutoffprice_perlot',
