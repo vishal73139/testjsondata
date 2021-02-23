@@ -373,8 +373,8 @@ export default class ExceptionSummary extends Component {
                                 value={this.state.processDate}
                             >
                                 {
-                                    [...new Set(this.state.metaData.map(item => item))].map(m => (
-                                        <MenuItem value={m.processDate}>{m.processDate}</MenuItem>
+                                    [...new Set(this.state.metaData.map(item => item.processDate))].map(m => (
+                                        <MenuItem value={m}>{m}</MenuItem>
                                     ))
                                 }
                             </Select>
@@ -388,8 +388,10 @@ export default class ExceptionSummary extends Component {
                                 value={this.state.version}
                             >
                                 {
-                                    this.state.metaData.filter(f => f.processDate === this.state.processDate).map(m => (
-                                        <MenuItem value={m.version}>{m.version}</MenuItem>
+                                    [...new Set(this.state.metaData.filter(f => 
+                                        f.processDate === this.state.processDate)
+                                        .map(item => item.version))].map(m => (
+                                        <MenuItem value={m}>{m}</MenuItem>
                                     ))
                                 }
                             </Select>
