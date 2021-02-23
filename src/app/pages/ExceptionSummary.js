@@ -273,27 +273,27 @@ export default class ExceptionSummary extends Component {
                     filterColumn.attributeListForSuggestion.forEach(e => {
                         aiPayload.push(res.data[0][e]);
                     });
-                    // getAdjSuggestionsForCustomerBase({data: [aiPayload]}).then(res => {
-                    adjustableRows.push({
-                        id: item.trim().split("&&")[0],
-                        tableName: rowData.tableName,
-                        attribute: rowData.attribute,
-                        primaryKey: rowData.primaryKey,
-                        primaryKeyValue: item.trim().split("&&")[0],
-                        attributeOldValue: item.trim().split("&&")[1],
-                        processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
-                        version: rowData.version,
-                        attributeValueSuggestion: "gold"
-                    });
-
-                    if (count === adjustableRows.length) {
-                        this.setState({
-                            openModal: true,
-                            adjustableRows
+                    getAdjSuggestionsForCustomerBase({ data: [aiPayload] }).then(res => {
+                        adjustableRows.push({
+                            id: item.trim().split("&&")[0],
+                            tableName: rowData.tableName,
+                            attribute: rowData.attribute,
+                            primaryKey: rowData.primaryKey,
+                            primaryKeyValue: item.trim().split("&&")[0],
+                            attributeOldValue: item.trim().split("&&")[1],
+                            processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
+                            version: rowData.version,
+                            attributeValueSuggestion: "gold"
                         });
-                    }
 
-                    // });
+                        if (count === adjustableRows.length) {
+                            this.setState({
+                                openModal: true,
+                                adjustableRows
+                            });
+                        }
+
+                    });
                 });
             } else {
                 getStgApi({
@@ -309,27 +309,26 @@ export default class ExceptionSummary extends Component {
                     filterColumn.attributeListForSuggestion.forEach(e => {
                         aiPayload.push(res.data[0][e]);
                     });
-                    // getAdjSuggestionsForIpoApplication({data: [aiPayload]}).then(res => {
-                    adjustableRows.push({
-                        id: item.trim().split("&&")[0],
-                        tableName: rowData.tableName,
-                        attribute: rowData.attribute,
-                        primaryKey: rowData.primaryKey,
-                        primaryKeyValue: item.trim().split("&&")[0],
-                        attributeOldValue: item.trim().split("&&")[1],
-                        processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
-                        version: rowData.version,
-                        attributeValueSuggestion: "gold"
-                    });
-
-                    if (count === adjustableRows.length) {
-                        this.setState({
-                            openModal: true,
-                            adjustableRows
+                    getAdjSuggestionsForIpoApplication({ data: [aiPayload] }).then(res => {
+                        adjustableRows.push({
+                            id: item.trim().split("&&")[0],
+                            tableName: rowData.tableName,
+                            attribute: rowData.attribute,
+                            primaryKey: rowData.primaryKey,
+                            primaryKeyValue: item.trim().split("&&")[0],
+                            attributeOldValue: item.trim().split("&&")[1],
+                            processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
+                            version: rowData.version,
+                            attributeValueSuggestion: "gold"
                         });
-                    }
 
-                    // });
+                        if (count === adjustableRows.length) {
+                            this.setState({
+                                openModal: true,
+                                adjustableRows
+                            });
+                        }
+                    });
                 });
             }
         });
@@ -388,11 +387,11 @@ export default class ExceptionSummary extends Component {
                                 value={this.state.version}
                             >
                                 {
-                                    [...new Set(this.state.metaData.filter(f => 
+                                    [...new Set(this.state.metaData.filter(f =>
                                         f.processDate === this.state.processDate)
                                         .map(item => item.version))].map(m => (
-                                        <MenuItem value={m}>{m}</MenuItem>
-                                    ))
+                                            <MenuItem value={m}>{m}</MenuItem>
+                                        ))
                                 }
                             </Select>
                         </FormControl>
