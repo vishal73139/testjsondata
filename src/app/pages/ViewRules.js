@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {getRules,executeRules,reApplyAdj} from '../../redux/Httpcalls';
+import {getRules,executeRules,reApplyAdj,getProcessDateAndVersion} from '../../redux/Httpcalls';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import _ from 'underscore';
 import Table from '@material-ui/core/Table';
@@ -41,9 +41,11 @@ export default class ViewRules extends Component{
 			showExecuteModal:false,
 			executedRuleDetails:{},
 			finalSelectedProcessId:'',
-			finalSelectedVersion:0,
+			finalSelectedVersion:'',
 			showViewModal:false,
-			processDateArray:['2/16/2021']
+			processDateArray:[],
+			versionDataArray:[],
+			allProcessDateApidata:[]
 		}
 	}
 
@@ -66,7 +68,7 @@ export default class ViewRules extends Component{
 		reApplyAdj(reAdjuctObject).then((response) => {
 			this.setState({showExecuteModal:false},()=>{
 				executeRules(this.state.finalSelectedProcessId,selectedRules.ruleId,this.state.finalSelectedVersion).then((response) => {
-						 swal("Rule Successfully Executed and Found "+response.data+" Exceptions .!", {icon:"success"});
+						 swal("Rule Successfully Executed and Found "+response.data+" Exceptions.", {icon:"success"});
 						}, (error) => { 
 						 swal("Something went wrong.!", {icon:"error"}); 
 						});
@@ -74,6 +76,32 @@ export default class ViewRules extends Component{
 		}, (error) => { 
 					 swal("Something went wrong.!", {icon:"error"}); 
 					});
+	}
+
+	getProcessDates = (rowData) => {
+		let tableName = rowData.exceptionTablename;
+		getProcessDateAndVersion(tableName).then((response) => {
+				  let apiData = response.data;
+				  let allProcessDate = [];
+				  _.map(apiData,(comingData)=>{
+				  	if(!allProcessDate.includes(comingData.process_date)){
+				  		allProcessDate.push(comingData.process_date);
+				  	}
+				  })
+
+				  this.setState({
+				  	executedRuleDetails:rowData,
+				  	showExecuteModal:true,
+				  	processDateArray:allProcessDate,
+					versionDataArray:[],
+					allProcessDateApidata:apiData
+				  })
+
+				  
+				}, (error) => {
+				  console.log(" API- ERROR - "+error);
+				}); 
+
 	}
 
 	render(){
@@ -103,11 +131,12 @@ export default class ViewRules extends Component{
 		              <StyledTableCell align="center">{row.exceptionAttribute}</StyledTableCell>
 		              <StyledTableCell align="center">{(row.createdDate != null)?row.createdDate.split('T')[0]:''}</StyledTableCell>
 		              <StyledTableCell align="center"><VisibilityOutlinedIcon style={{cursor:'pointer'}} onClick={()=>{
+		              	
 		              	this.setState({showViewModal:true,executedRuleDetails:row});
 		              }}/>&nbsp;&nbsp;&nbsp;<PlayCircleFilledWhiteOutlinedIcon onClick={()=>{
 		              	
-
-		              	this.setState({executedRuleDetails:row,showExecuteModal:true});
+						this.getProcessDates(row);
+		              	/*this.setState({executedRuleDetails:row,showExecuteModal:true});*/
 		              }} style={{cursor:'pointer'}}/></StyledTableCell>
 		            </StyledTableRow>)
 		        	}):<StyledTableRow>No Record Found</StyledTableRow>
@@ -130,7 +159,17 @@ export default class ViewRules extends Component{
 						onChange={(event)=>{
 						          		
 						          		let selectedValue = event.target.value;
-						          		this.setState({finalSelectedProcessId:selectedValue});
+
+						          		let allVersionIds = [];
+						          		_.map(this.state.allProcessDateApidata,(getApiData)=>{
+
+						          			if(getApiData.process_date === selectedValue && !allVersionIds.includes(getApiData.version)){
+												allVersionIds.push(getApiData.version);
+						          			}
+
+						          		});
+
+						          		this.setState({finalSelectedProcessId:selectedValue,versionDataArray:allVersionIds});
 						          	}} 
 				      	>
 				        <option>Choose...</option>
@@ -153,9 +192,11 @@ export default class ViewRules extends Component{
 						          	}} 
 				      	>
 				        <option>Choose...</option>
-				        <option>0</option>
-				        <option>1</option>
-				        <option>2</option>
+				          {
+				        	_.map(this.state.versionDataArray,(comingVersionId)=>{
+				        		return <option value={comingVersionId}> {comingVersionId}</option>
+				        	})
+				          }  
 				      </Form.Control>
 				    </Form.Group> 
 

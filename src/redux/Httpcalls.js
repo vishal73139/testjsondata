@@ -21,3 +21,5 @@ export const getAdjSuggestionsForIpoApplication = (postData) => newAxiosInstance
 export const getStgApi = (postData) => newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/stageApi',postData,{"Access-Control-Allow-Origin":"*"});
 
 export const reApplyAdj = (postData)  => newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/reApplyAdj',postData,{"Access-Control-Allow-Origin":"*"});
+
+export const getProcessDateAndVersion = (tableName) => newAxiosInstance.get('https://datapurereposervicenew.azurewebsites.net/getAllProcessDate?tableName='+tableName);
