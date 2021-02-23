@@ -274,25 +274,25 @@ export default class ExceptionSummary extends Component {
                         aiPayload.push(res.data[0][e]);
                     });
                     // getAdjSuggestionsForCustomerBase({data: [aiPayload]}).then(res => {
-                        adjustableRows.push({
-                            id: item.trim().split("&&")[0],
-                            tableName: rowData.tableName,
-                            attribute: rowData.attribute,
-                            primaryKey: rowData.primaryKey,
-                            primaryKeyValue: item.trim().split("&&")[0],
-                            attributeOldValue: item.trim().split("&&")[1],
-                            processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
-                            version: rowData.version,
-                            attributeValueSuggestion: "gold"
-                        });
+                    adjustableRows.push({
+                        id: item.trim().split("&&")[0],
+                        tableName: rowData.tableName,
+                        attribute: rowData.attribute,
+                        primaryKey: rowData.primaryKey,
+                        primaryKeyValue: item.trim().split("&&")[0],
+                        attributeOldValue: item.trim().split("&&")[1],
+                        processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
+                        version: rowData.version,
+                        attributeValueSuggestion: "gold"
+                    });
 
-                        if (count === adjustableRows.length) {
-                            this.setState({
-                                openModal: true,
-                                adjustableRows
-                            });
-                        }
-                        
+                    if (count === adjustableRows.length) {
+                        this.setState({
+                            openModal: true,
+                            adjustableRows
+                        });
+                    }
+
                     // });
                 });
             } else {
@@ -310,25 +310,25 @@ export default class ExceptionSummary extends Component {
                         aiPayload.push(res.data[0][e]);
                     });
                     // getAdjSuggestionsForIpoApplication({data: [aiPayload]}).then(res => {
-                        adjustableRows.push({
-                            id: item.trim().split("&&")[0],
-                            tableName: rowData.tableName,
-                            attribute: rowData.attribute,
-                            primaryKey: rowData.primaryKey,
-                            primaryKeyValue: item.trim().split("&&")[0],
-                            attributeOldValue: item.trim().split("&&")[1],
-                            processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
-                            version: rowData.version,
-                            attributeValueSuggestion: "gold"
-                        });
+                    adjustableRows.push({
+                        id: item.trim().split("&&")[0],
+                        tableName: rowData.tableName,
+                        attribute: rowData.attribute,
+                        primaryKey: rowData.primaryKey,
+                        primaryKeyValue: item.trim().split("&&")[0],
+                        attributeOldValue: item.trim().split("&&")[1],
+                        processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
+                        version: rowData.version,
+                        attributeValueSuggestion: "gold"
+                    });
 
-                        if (count === adjustableRows.length) {
-                            this.setState({
-                                openModal: true,
-                                adjustableRows
-                            });
-                        }
-                        
+                    if (count === adjustableRows.length) {
+                        this.setState({
+                            openModal: true,
+                            adjustableRows
+                        });
+                    }
+
                     // });
                 });
             }
@@ -341,9 +341,9 @@ export default class ExceptionSummary extends Component {
 
     handleSave = () => {
         applyAdj(this.state.applyAdjPayload).then(res => {
-            swal("Saved Successfully.", {icon:"success"});
+            swal("Saved Successfully.", { icon: "success" });
         }).catch(err => {
-            swal("Failed to Save.", {icon: "error"});
+            swal("Failed to Save.", { icon: "error" });
             console.log(err);
         });
     }
@@ -373,8 +373,8 @@ export default class ExceptionSummary extends Component {
                                 value={this.state.processDate}
                             >
                                 {
-                                    this.state.metaData.map(m => (
-                                        <MenuItem value={m.processDate}>{m.processDate}</MenuItem>
+                                    [...new Set(this.state.metaData.map(item => item.processDate))].map(m => (
+                                        <MenuItem value={m}>{m}</MenuItem>
                                     ))
                                 }
                             </Select>
@@ -388,8 +388,10 @@ export default class ExceptionSummary extends Component {
                                 value={this.state.version}
                             >
                                 {
-                                    this.state.metaData.filter(f => f.processDate === this.state.processDate).map(m => (
-                                        <MenuItem value={m.version}>{m.version}</MenuItem>
+                                    [...new Set(this.state.metaData.filter(f => 
+                                        f.processDate === this.state.processDate)
+                                        .map(item => item.version))].map(m => (
+                                        <MenuItem value={m}>{m}</MenuItem>
                                     ))
                                 }
                             </Select>

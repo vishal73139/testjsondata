@@ -101,35 +101,7 @@ export function AsideMenuList({ layoutProps }) {
 
         </li>
 
-      {/* Exception End Here*/} 
-
-      {/* Adjustments Code */} 
-
-        <li className="menu-section ">
-          <h4 className="menu-text">Adjustments</h4>
-          <i className="menu-icon flaticon-more-v2"></i>
-        </li>
-
-        <li
-          className={`menu-item menu-item-submenu`}
-          aria-haspopup="true"
-          data-menu-toggle="hover"
-        >
-        
-          <NavLink className="menu-link menu-toggle" to="/google-material">
-            <span className="svg-icon menu-icon">
-              <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Brush.svg")} />
-            </span>
-            <span className="menu-text">Adjust Exceptions</span>
-            <i className="menu-arrow" />
-          </NavLink>
-
-        </li>
-
-      {/* Adjustments End Here*/} 
-
-
-        
+      {/* Exception End Here*/}         
       </ul>
 
       {/* end::Menu Nav */}
