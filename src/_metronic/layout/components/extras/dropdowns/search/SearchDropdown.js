@@ -147,7 +147,7 @@ export function SearchDropdown() {
 
   return (
     <>
-      {layoutProps.offcanvas && (
+      {/* {layoutProps.offcanvas && (
         <div className="topbar-item">
           <div
             className="btn btn-icon btn-clean btn-lg mr-1"
@@ -237,7 +237,7 @@ export function SearchDropdown() {
             </div>
           </Dropdown.Menu>
         </Dropdown>
-      )}
+      )} */}
     </>
   );
 }

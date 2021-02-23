@@ -415,7 +415,7 @@ export default class ExceptionSummary extends Component {
                         <FormControl className="exception-summary-form-control float-right mt-5">
                             <ButtonGroup color="primary" aria-label="outlined primary button group">
                                 <Button onClick={() => this.onSearchClick()}
-                                    disabled={!this.state.processDate && !this.state.version}>Search</Button>
+                                    disabled={!(this.state.processDate && this.state.version)}>Search</Button>
                                 {/* <Button onClick={() => this.onResetClick()}>Reset</Button> */}
                             </ButtonGroup>
                         </FormControl>
@@ -508,7 +508,7 @@ export default class ExceptionSummary extends Component {
                             <Modal.Title>Adjustments</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
-                            <div style={{ height: 400, width: '100%' }}>
+                            <div style={{ height: 350, width: '100%' }}>
                                 <DataGrid
                                     rows={this.state.adjustableRows}
                                     columns={adjustmentColumns.map((column) => ({
