@@ -232,18 +232,18 @@ constructor(props){
 	this.state = {
 		showCreateRuleModal:false,
 		rulesTables:[
-			'customer_base',
-			'ipo_applications'
+			'v_customer_base',
+			'v_ipo_applications'
 		],
 		attributeForRule:
 			{
-				customer_base:[
+				v_customer_base:[
 					'stateName',
 					'city',
 					'pin',
 					'cust_classification'
 				],
-				ipo_applications:[
+				v_ipo_applications:[
 					'cutoffprice_perlot',
 					'bid_amount_perlot',
 					'total_bid_amount'
@@ -504,11 +504,11 @@ generateQuery = () => {
 
 				console.log("sqlResult",sqlResult);
 				let primary_key = ''
-				if(this.state.exceptionTableName == 'customer_base'){
+				if(this.state.exceptionTableName == 'v_customer_base'){
 					primary_key = 'PAN,'
 				}
 
-				if(this.state.exceptionTableName == 'ipo_applications'){
+				if(this.state.exceptionTableName == 'v_ipo_applications'){
 					primary_key = 'ipo_application_number,'
 				}
 
