@@ -7,8 +7,12 @@ import {
 import { DataGrid } from '@material-ui/data-grid';
 import { Modal } from 'react-bootstrap';
 import CountUp from "react-countup";
-import { getExceptionType, applyAdj } from '../../redux/Httpcalls';
+import {
+    getExceptionType, applyAdj, getMetadata,
+    getAdjSuggestionsForCustomerBase, getAdjSuggestionsForIpoApplication
+} from '../../redux/Httpcalls';
 import moment from 'moment';
+import swal from 'sweetalert';
 
 let gridPayload;
 
@@ -47,7 +51,7 @@ const adjustmentColumns = [
     },
     {
         field: "primaryKeyValue",
-        headerName: "Primary Key Value",
+        headerName: "Primary Value",
         flex: 1
     },
     {
@@ -57,12 +61,25 @@ const adjustmentColumns = [
     },
     {
         field: "attributeOldValue",
-        headerName: "Attribute Old Value",
+        headerName: "Old Value",
         flex: 1
     },
     {
+        field: "attributeValueSuggestion",
+        headerName: "AI/ML Suggestion",
+        flex: 1,
+        renderCell: (params) => {
+            if (params.row.tableName === "customer_base") {
+                getAdjSuggestionsForCustomerBase({data: [[5, 172, 1800000]]}).then(res => console.log(res));
+            } else {
+                getAdjSuggestionsForIpoApplication().then(res => console.log(res));
+            }
+            return "gold"
+        }
+    },
+    {
         field: "attributeNewValue",
-        headerName: "Attribute New Value",
+        headerName: "New Value",
         flex: 1,
         renderCell: (params) => {
             const onAdjustmentEdit = (e) => {
@@ -73,8 +90,9 @@ const adjustmentColumns = [
                     priVals: params.row.primaryKeyValue,
                     oldVal: params.row.attributeOldValue,
                     newVal: e.target.value,
-                    adjustedTime: moment(new Date()).format("YY-MM-DD hh:mm:ss.SSS"),
-                    expiryDate: moment(new Date()).add(30, 'day').format("YY-MM-DD hh:mm:ss.SSS")
+                    expiryDate: moment(new Date()).add(30, 'day').format("DD-MMM-YYYY").toUpperCase(),
+                    processDate: params.row.processDate,
+                    version: params.row.version
                 };
                 gridPayload.length === 0 && gridPayload.push(obj);
                 for (let i = 0, len = gridPayload.length || 0; i < len; i++) {
@@ -88,7 +106,28 @@ const adjustmentColumns = [
             return <Input placeholder="Suggestions" onBlur={(e) => onAdjustmentEdit(e)} />
         }
     }
-]
+];
+
+const aiMlColumns = [{
+    tableName: "ipo_applications",
+    attributeValueMap: {
+        1: "INDIGO PAINTS",
+        2: "IRFC",
+        3: "NERCO",
+        4: "STONECRAFT"
+    },
+    attributeListForSuggestion: ["cutoffprice_perlot", "numberOf_lots", "bid_amount_perlot"],
+    excepAttribute: "ipo_name"
+}, {
+    tableName: "customer_base",
+    attributeValueMap: {
+        1: "silver",
+        2: "gold",
+        3: "platinum"
+    },
+    attributeListForSuggestion: ["cust_acct_age", "credit_score", "yearly_trans_amt"],
+    excepAttribute: "cust_classification"
+}];
 
 export default class ExceptionSummary extends Component {
 
@@ -102,8 +141,17 @@ export default class ExceptionSummary extends Component {
             showCounter: false,
             showExceptionSummaryGrid: false,
             counterData: [],
-            exceptionData: []
+            exceptionData: [],
+            metaData: []
         }
+    }
+
+    componentDidMount() {
+        getMetadata().then(res => {
+            this.setState({
+                metaData: res.data
+            });
+        });
     }
 
     getNearestInteger(value, roundToPlace) {
@@ -153,9 +201,9 @@ export default class ExceptionSummary extends Component {
     }
 
     onSearchClick() {
-        if (this.state.tableName) {
+        if (this.state.processDate && this.state.version) {
             gridPayload = [];
-            getExceptionType({ tableName: this.state.tableName }).then((response) => {
+            getExceptionType({ processDate: this.state.processDate, version: this.state.version }).then((response) => {
                 const res = response.data.reduce((acc, item) => {
                     acc = {
                         ...acc,
@@ -219,12 +267,14 @@ export default class ExceptionSummary extends Component {
         let pkValues = rowData.primaryKeyValue.replace("]", "").replace("[", "");
         pkValues.split(",").forEach((item) => {
             adjustableRows.push({
-                id: item.trim(),
+                id: item.trim().split("&&")[0],
                 tableName: rowData.tableName,
                 attribute: rowData.attribute,
                 primaryKey: rowData.primaryKey,
-                primaryKeyValue: item.trim(),
-                attributeOldValue: 123
+                primaryKeyValue: item.trim().split("&&")[0],
+                attributeOldValue: item.trim().split("&&")[1],
+                processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
+                version: rowData.version
             });
         });
         this.setState({
@@ -238,12 +288,17 @@ export default class ExceptionSummary extends Component {
     }
 
     handleSave = () => {
-        applyAdj(this.state.applyAdjPayload).then(res => console.log(res)).catch(err => console.log(err));
+        applyAdj(this.state.applyAdjPayload).then(res => {
+            swal("Saved Successfully.", {icon:"success"});
+        }).catch(err => {
+            swal("Failed to Save.", {icon: "error"});
+            console.log(err);
+        });
     }
 
     setSelectionModel = (newSelection) => {
         console.log(newSelection, gridPayload);
-        var g = gridPayload.filter(g => {
+        const g = gridPayload.filter(g => {
             return newSelection.selectionModel.indexOf(g.priVals) > -1;
         });
         this.setState({
@@ -258,22 +313,41 @@ export default class ExceptionSummary extends Component {
                 <div className="row bg-white">
                     <div className="col-lg-8 col-md-8 exception-summary-form-class">
                         <FormControl className="exception-summary-form-control">
-                            <InputLabel id="es-table-name">Table Name</InputLabel>
+                            <InputLabel id="es-process-date">Process Date</InputLabel>
                             <Select
-                                labelId="es-table-name"
-                                id="es-table-name-select"
-                                onChange={(e) => this.onSelectChange(e, "tableName")}
-                                value={this.state.tableName}
+                                labelId="es-process-date"
+                                id="es-process-date-select"
+                                onChange={(e) => this.onSelectChange(e, "processDate")}
+                                value={this.state.processDate}
                             >
-                                <MenuItem value="customer_base">Customer Base</MenuItem>
-                                <MenuItem value="ipo_applications">IPO Application</MenuItem>
+                                {
+                                    this.state.metaData.map(m => (
+                                        <MenuItem value={m.processDate}>{m.processDate}</MenuItem>
+                                    ))
+                                }
+                            </Select>
+                        </FormControl>
+                        <FormControl className="exception-summary-form-control">
+                            <InputLabel id="es-version">Version</InputLabel>
+                            <Select
+                                labelId="es-version"
+                                id="es-version-select"
+                                onChange={(e) => this.onSelectChange(e, "version")}
+                                value={this.state.version}
+                            >
+                                {
+                                    this.state.metaData.filter(f => f.processDate === this.state.processDate).map(m => (
+                                        <MenuItem value={m.version}>{m.version}</MenuItem>
+                                    ))
+                                }
                             </Select>
                         </FormControl>
                     </div>
                     <div className="col-lg-4 col-md-4">
                         <FormControl className="exception-summary-form-control float-right mt-5">
                             <ButtonGroup color="primary" aria-label="outlined primary button group">
-                                <Button onClick={() => this.onSearchClick()} disabled={!this.state.tableName}>Search</Button>
+                                <Button onClick={() => this.onSearchClick()}
+                                    disabled={!this.state.processDate && !this.state.version}>Search</Button>
                                 {/* <Button onClick={() => this.onResetClick()}>Reset</Button> */}
                             </ButtonGroup>
                         </FormControl>
@@ -388,7 +462,7 @@ export default class ExceptionSummary extends Component {
                                     Save
                             </Button>
                             </div>
-                            <p style={{ textAlign: "center" }}><strong>Note <sup>:</sup></strong> Expiry of Adjustments is set to default by 30 days from the day it is adjusted.</p>
+                            <p style={{ textAlign: "center" }}><strong>Note: </strong> Expiry of Adjustments is set to default by 30 days from the day it is adjusted.</p>
                         </Modal.Footer>
                     </Modal>
                 </div>
