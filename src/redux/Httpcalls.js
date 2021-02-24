@@ -34,3 +34,6 @@ export const getTableStageData = (tableName,processDate,versionId) => {
 	}
 	return newAxiosInstance.get(url);
 }
+
+export const saveCustomerbaseDataApi = (postData) => newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/saveCustomerTableData',postData,{"Access-Control-Allow-Origin":"*"});
+

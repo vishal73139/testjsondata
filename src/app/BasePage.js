@@ -9,6 +9,7 @@ import ViewRules from "./pages/ViewRules";
 import ExecuteRules from "./pages/ExecuteRules";
 import ExceptionSummary from "./pages/ExceptionSummary";
 import InjectionPage from "./pages/InjectionPage";
+import DownstreamdataPage from "./pages/DownstreamdataPage";
 
 const GoogleMaterialPage = lazy(() =>
   import("./modules/GoogleMaterialExamples/GoogleMaterialPage")
@@ -43,6 +44,7 @@ export default function BasePage() {
         <ContentRoute path="/exception-summary" component={ExceptionSummary} />
         <ContentRoute path="/builder" component={BuilderPage} />
         <ContentRoute path="/injection" component={InjectionPage} />
+        <ContentRoute path="/downstreamdata" component={DownstreamdataPage} />
         <ContentRoute path="/my-page" component={MyPage} />
         <Route path="/google-material" component={GoogleMaterialPage} />
         <Route path="/react-bootstrap" component={ReactBootstrapPage} />

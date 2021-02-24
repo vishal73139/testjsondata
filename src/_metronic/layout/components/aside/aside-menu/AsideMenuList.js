@@ -101,7 +101,7 @@ export function AsideMenuList({ layoutProps }) {
     {/* Exception Code */} 
 
         <li className="menu-section ">
-          <h4 className="menu-text">Exceptions</h4>
+          <h4 className="menu-text">Exceptions & Adjustment</h4>
           <i className="menu-icon flaticon-more-v2"></i>
         </li>
 
@@ -121,7 +121,30 @@ export function AsideMenuList({ layoutProps }) {
 
         </li>
 
-      {/* Exception End Here*/}         
+      {/* Exception End Here*/}    
+
+        {/* RMS Code */} 
+
+        <li className="menu-section ">
+          <h4 className="menu-text">Downstream Data</h4>
+          <i className="menu-icon flaticon-more-v2"></i>
+        </li>
+         <li
+          className={`menu-item menu-item-submenu`}
+          aria-haspopup="true"
+          data-menu-toggle="hover"
+        >
+        
+          <NavLink className="menu-link menu-toggle" to="/downstreamdata">
+            <span className="svg-icon menu-icon">
+              <SVG src={toAbsoluteUrl("/media/svg/icons/Design/Join-2.svg")} />
+            </span>
+            <span className="menu-text">Adjusted Datasource</span>
+            <i className="menu-arrow" />
+          </NavLink>
+         </li>
+      {/* RMS Code */} 
+     
       </ul>
 
       {/* end::Menu Nav */}
