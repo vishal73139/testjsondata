@@ -33,6 +33,7 @@ export default class InjectionPage extends Component{
             rowsPerPage: 20,
             showCounter: true,
             loadingTabledata:false,
+            errorOnTableData:false,
             showUploadDataModalPopup:false,
             uploadedFileData:[],
             enableSubmit:false,
@@ -47,7 +48,7 @@ export default class InjectionPage extends Component{
 	}
 
 	getActualTableValues = () => {
-		this.setState({loadingTabledata:false},()=>{
+		this.setState({loadingTabledata:false,errorOnTableData:false},()=>{
 		let tableName = this.state.selectedTableName;
 		let process_date = this.state.selectedProcessDate;
 		let version = this.state.selectedVersion;
@@ -75,12 +76,17 @@ export default class InjectionPage extends Component{
 					//tableHeaderData:allHeaderKeys,
 					tableHeaderData:setHeaderinDataSet,
 					tableRowData:[...createNewSetOfData],
-					loadingTabledata:true
+					loadingTabledata:true,
+					errorOnTableData:false
 				});
 				console.log(createNewSetOfData);
 			}
+			else{
+				this.setState({errorOnTableData:true});
+			}
 			
 		}, (error) => {
+			this.setState({errorOnTableData:true});
 				  console.log(" API- ERROR - "+error);
 				}); 
 	});
@@ -277,7 +283,7 @@ export default class InjectionPage extends Component{
 				 {
                     (this.state.loadingTabledata)?<div className="row" style={{ height: 700, width: '100%',backgroundColor:'white',marginTop:'10px',marginLeft:'-5px'}}>
 				      <DataGrid rows={this.state.tableRowData} columns={this.state.tableHeaderData} pageSize={20} checkboxSelection />
-				    </div>:<div style={{width:'100%',textAlign:'center',marginTop:'20px'}}><Spinner animation="border" variant="primary" /></div>
+				    </div>:(this.state.errorOnTableData)?<div style={{width:'100%',textAlign:'center',marginTop:'20px'}}> No Data Found </div>:<div style={{width:'100%',textAlign:'center',marginTop:'20px'}}><Spinner animation="border" variant="primary" /></div>
                 }
 
 
