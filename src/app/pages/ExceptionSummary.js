@@ -324,12 +324,15 @@ export default class ExceptionSummary extends Component {
                 }).then(res => {
                     filterColumn = aiMlColumns.find(a => a.tableName === rowData.tableName);
                     let aiPayload = [];
+                    let adjRow = {};
                     filterColumn.attributeListForSuggestion.forEach(e => {
                         aiPayload.push(res.data[0][e]);
+                        adjRow[e] = res.data[0][e];
                     });
                     getAdjSuggestionsForIpoApplication({ data: [aiPayload] }).then(res => {
                         const aiSuggestion = filterColumn.attributeValueMap[res.data[0]];
-                        adjustableRows.push({
+                        adjRow = {
+                            ...adjRow,
                             id: item.trim().split("&&")[0],
                             tableName: rowData.tableName,
                             attribute: rowData.attribute,
@@ -339,12 +342,14 @@ export default class ExceptionSummary extends Component {
                             processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
                             version: rowData.version,
                             attributeValueSuggestion: aiSuggestion
-                        });
+                        }
+                        adjustableRows.push(adjRow);
 
                         if (count === adjustableRows.length) {
                             this.setState({
                                 openModal: true,
-                                adjustableRows
+                                adjustableRows,
+                                showLoading: false
                             });
                         }
                     });
@@ -512,7 +517,7 @@ export default class ExceptionSummary extends Component {
                             <Modal.Title>Adjustments</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
-                            <div style={{ height: 350, width: '100%' }}>
+                            <div style={{ height: 400, width: '100%' }}>
                                 <DataGrid
                                     rows={this.state.adjustableRows}
                                     columns={adjustmentColumns.map((column) => ({
