@@ -64,6 +64,15 @@
     .modal-footer {
         display: block !important;
     } 
+    .ai-suggestion {
+        text-transform: capitalize;
+        width: 100%;
+        background-color: #2979cc;
+        height: 100%;
+        color: white;
+        text-align: center;
+        line-height: 4;
+    }
 }
 
 .csv-input {

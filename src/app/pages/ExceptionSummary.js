@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react";
 import {
     Select, InputLabel, MenuItem, FormControl, ButtonGroup, Button,
     Table, TableHead, TableBody, TableCell, TableContainer, TableFooter, TablePagination, TableRow,
-    Paper, Input, Tooltip, CircularProgress
+    Paper, Input, Tooltip, CircularProgress, Typography
 } from '@material-ui/core';
 import { DataGrid } from '@material-ui/data-grid';
 import { Modal } from 'react-bootstrap';
@@ -21,15 +21,7 @@ const columns = [
     { id: 'tableName', label: 'Table Name' },
     { id: 'exceptionType', label: 'Exception Type' },
     { id: 'attribute', label: 'Attribute' },
-    {
-        id: 'primaryKey',
-        label: 'Primary Key'
-    },
-    {
-        id: 'count',
-        label: 'Count',
-        showLink: true
-    },
+    { id: 'count', label: 'Count', showLink: true }
 ];
 
 const adjustmentColumns = [
@@ -47,11 +39,12 @@ const adjustmentColumns = [
     {
         field: "primaryKey",
         headerName: "Primary Key",
-        flex: 1
+        flex: 1,
+        hide: true
     },
     {
         field: "primaryKeyValue",
-        headerName: "Primary Value",
+        headerName: "Customer Value",
         flex: 1
     },
     {
@@ -67,12 +60,18 @@ const adjustmentColumns = [
     {
         field: "attributeValueSuggestion",
         headerName: "AI Suggestion",
+        description: "Values are suggested by AI / ML Algorithm",
         flex: 1,
         renderCell: (params) => {
-            const title = `Suggestion based on coulmns ${aiMlColumns.find(a => params.row.tableName === a.tableName).attributeListForSuggestion}`
+            const suggestList = aiMlColumns.find(a => params.row.tableName === a.tableName).attributeListForSuggestion;
             return (
-                <Tooltip title={title}>
-                    <span>{params.row.attributeValueSuggestion}</span>
+                <Tooltip title={<React.Fragment>
+                    <Typography>Suggestion based on columns </Typography>
+                    {
+                        suggestList.map(s => <Typography><b>{s}: </b>{params.row[s]}</Typography>)
+                    }
+                </React.Fragment>}>
+                    <Typography className="ai-suggestion">{params.row.attributeValueSuggestion}</Typography>
                 </Tooltip>
             )
         }
@@ -282,13 +281,16 @@ export default class ExceptionSummary extends Component {
                 }).then(res => {
                     filterColumn = aiMlColumns.find(a => a.tableName === rowData.tableName);
                     let aiPayload = [];
+                    let adjRow = {};
                     filterColumn.attributeListForSuggestion.forEach(e => {
                         aiPayload.push(res.data[0][e]);
+                        adjRow[e] = res.data[0][e];
                     });
                     getAdjSuggestionsForCustomerBase({ data: [aiPayload] }).then(res => {
                         console.log("AI response", res.data);
                         const aiSuggestion = filterColumn.attributeValueMap[res.data[0]];
-                        adjustableRows.push({
+                        adjRow = {
+                            ...adjRow,
                             id: item.trim().split("&&")[0],
                             tableName: rowData.tableName,
                             attribute: rowData.attribute,
@@ -298,7 +300,9 @@ export default class ExceptionSummary extends Component {
                             processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
                             version: rowData.version,
                             attributeValueSuggestion: aiSuggestion
-                        });
+                        };
+
+                        adjustableRows.push(adjRow);
 
                         if (count === adjustableRows.length) {
                             this.setState({
@@ -508,12 +512,12 @@ export default class ExceptionSummary extends Component {
                             <Modal.Title>Adjustments</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
-                            <div style={{ height: 400, width: '100%' }}>
+                            <div style={{ height: 350, width: '100%' }}>
                                 <DataGrid
                                     rows={this.state.adjustableRows}
                                     columns={adjustmentColumns.map((column) => ({
                                         ...column,
-                                        disableClickEventBubbling: true,
+                                        disableClickEventBubbling: true
                                     }))}
                                     pageSize={5}
                                     checkboxSelection

@@ -282,7 +282,8 @@ export default class InjectionPage extends Component{
 
 				 {
                     (this.state.loadingTabledata)?<div className="row" style={{ height: 700, width: '100%',backgroundColor:'white',marginTop:'10px',marginLeft:'-5px'}}>
-				      <DataGrid rows={this.state.tableRowData} columns={this.state.tableHeaderData} pageSize={20} checkboxSelection />
+				      <DataGrid rows={this.state.tableRowData} columns={this.state.tableHeaderData} 
+					  pageSize={20} checkboxSelection />
 				    </div>:(this.state.errorOnTableData)?<div style={{width:'100%',textAlign:'center',marginTop:'20px'}}> No Data Found </div>:<div style={{width:'100%',textAlign:'center',marginTop:'20px'}}><Spinner animation="border" variant="primary" /></div>
                 }
 
