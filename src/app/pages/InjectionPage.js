@@ -10,6 +10,7 @@ import {getProcessDateAndVersion,getTableStageData,saveCustomerbaseDataApi,saveI
 import {Modal,Form, Col, Badge,Spinner} from 'react-bootstrap';
 import CSVReader from 'react-csv-reader';
 import swal from 'sweetalert';
+import { DataGrid } from '@material-ui/data-grid';
 
 export default class InjectionPage extends Component{
 
@@ -49,20 +50,36 @@ export default class InjectionPage extends Component{
 		this.setState({loadingTabledata:false},()=>{
 		let tableName = this.state.selectedTableName;
 		let process_date = this.state.selectedProcessDate;
-		let version = this.state.selectedVersion
-
+		let version = this.state.selectedVersion;
 		
 		getTableStageData(tableName,process_date,version).then((response) => {
 			if(_.size(response.data) > 0){
 				let allHeaderKeys = _.keys(response.data[0]);
-				console.log(allHeaderKeys);
+				let setHeaderinDataSet = [];
+				_.map(allHeaderKeys,(keyName)=>{
+					setHeaderinDataSet.push({ field: keyName, headerName: keyName, width: 150 });
+				});
+				console.log(setHeaderinDataSet);
+
+				let createNewSetOfData = [];
+				let count = 1;
+				_.map(response.data,(rowData)=>{
+					if(rowData.adj_version == 0)
+					{
+						rowData.id=count;
+						createNewSetOfData.push(rowData);
+						count++;
+					}
+				});
 				this.setState({
-					tableHeaderData:allHeaderKeys,
-					tableRowData:response.data,
+					//tableHeaderData:allHeaderKeys,
+					tableHeaderData:setHeaderinDataSet,
+					tableRowData:[...createNewSetOfData],
 					loadingTabledata:true
 				});
+				console.log(createNewSetOfData);
 			}
-			console.log(response.data);
+			
 		}, (error) => {
 				  console.log(" API- ERROR - "+error);
 				}); 
@@ -172,15 +189,15 @@ export default class InjectionPage extends Component{
 			        .replace(/\W/g, '_')
 			  }
 		return(
-			 <div className="injection-page-class">
-			 <div className="row">
+			 <div className="injection-page-class" style={{padding:'0px'}}>
+			 <div className="row" style={{padding:'0px'}}>
 			 	<div className="col-lg-10 col-md-10">
                         
                  </div>
-			 	 <div className="col-lg-2 col-md-2" stylr={{textAlign:'right'}}>
+			 	 <div className="col-lg-2 col-md-2" style={{textAlign:'right',padding:'0px'}}>
                         <button class="btn btn-primary" onClick={()=>{
                         	this.showUploadDataPopup();
-                        }}>Insert Data</button>
+                        }} style={{marginLeft:'15px'}}>Insert Data</button>
                  </div>
 			 	
 			 </div>
@@ -258,52 +275,11 @@ export default class InjectionPage extends Component{
 				</div>
 
 				 {
-                    this.state.loadingTabledata && <div className="row mt-2">
-                        <TableContainer component={Paper}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        {_.map(this.state.tableHeaderData,(column) => (
-                                            <TableCell
-                                            align="left"
-                                            >
-                                                {column}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                  {
-                                    	this.state.tableRowData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
-							            <TableRow>
-							            {
-							            	 _.map(this.state.tableHeaderData,(keyColumn)=>{
-							            		return (<TableCell align="left">
-							            			{row[keyColumn]}
-							            		</TableCell>)
-							            	})
-							            }
-							              
-							            </TableRow>
-							          ))
-							      }
-                                </TableBody>
-
-                            </Table>
-                        </TableContainer>
-                        <div style={{ width: "100%" }}>
-                            <TablePagination
-                                rowsPerPageOptions={[20, 40, 60, 80, 100]}
-                                component="div"
-                                count={_.size(this.state.tableRowData)}
-                                rowsPerPage={rowsPerPage}
-                                page={page}
-                                onChangePage={(e, newPage) => this.onHandlePageChange(e, newPage)}
-                                onChangeRowsPerPage={(e, rowsPerPage) => this.onHandleChangeRowsPerPage(e, rowsPerPage)}
-                            />
-                        </div>
-                    </div>
+                    (this.state.loadingTabledata)?<div className="row" style={{ height: 700, width: '100%',backgroundColor:'white',marginTop:'10px',marginLeft:'-5px'}}>
+				      <DataGrid rows={this.state.tableRowData} columns={this.state.tableHeaderData} pageSize={20} checkboxSelection />
+				    </div>:<div style={{width:'100%',textAlign:'center',marginTop:'20px'}}><Spinner animation="border" variant="primary" /></div>
                 }
+
 
 
                 <Modal show={this.state.showUploadDataModalPopup}>

@@ -28,7 +28,9 @@ export const getTableStageData = (tableName,processDate,versionId) => {
 	let url = 'https://datapurereposervicenew.azurewebsites.net/getStageData?tableName='+tableName;
 	if(processDate != ''){
 		url +='&processDate='+processDate;
-		if(versionId != ''){
+
+		if(!isNaN(versionId)){
+			console.log("version==="+versionId);
 			url +='&version='+versionId;
 		}
 	}
