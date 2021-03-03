@@ -513,7 +513,7 @@ generateQuery = () => {
 					primary_key = 'ipo_application_number,'
 				}
 
-				let ruleSqlQuery = "SELECT "+primary_key+" "+this.state.exceptionAttributeName+" FROM "+this.state.exceptionTableName+" WHERE "+sqlResult;
+				let ruleSqlQuery = "SELECT "+primary_key+" "+this.state.exceptionAttributeName+" FROM "+this.state.exceptionTableName+" WHERE "+sqlResult+" GROUP BY "+primary_key+","+this.state.exceptionAttributeName;
 				console.log("fullQuery",format(ruleSqlQuery));
 				this.setState({ruleSqlQuery});
 				return true;
