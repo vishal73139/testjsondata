@@ -21,7 +21,8 @@ export default class DownstreamdataPage extends Component{
 			selectedVersion:'',
 			allTableName:[
 			'v_customer_base',
-			'v_ipo_applications'
+			'v_ipo_applications',
+			'v_party'
 			],
 			processDatesArray:[],
 			versionDataArray:[],

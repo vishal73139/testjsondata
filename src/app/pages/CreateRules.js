@@ -233,7 +233,8 @@ constructor(props){
 		showCreateRuleModal:false,
 		rulesTables:[
 			'v_customer_base',
-			'v_ipo_applications'
+			'v_ipo_applications',
+			'v_party'
 		],
 		attributeForRule:
 			{
@@ -248,6 +249,10 @@ constructor(props){
 					'cutoffprice_perlot',
 					'bid_amount_perlot',
 					'total_bid_amount'
+				],
+				v_party:[
+					'int_party_group_code',
+					'int_ext_party_indicator'
 				]
 			},
 		conditionOperators:[
@@ -511,6 +516,10 @@ generateQuery = () => {
 
 				if(this.state.exceptionTableName == 'v_ipo_applications'){
 					primary_key = 'ipo_application_number,'
+				}
+
+				if(this.state.exceptionTableName == 'v_party'){
+					primary_key = 'party_id,'
 				}
 
 				let ruleSqlQuery = "SELECT "+primary_key+" "+this.state.exceptionAttributeName+" FROM "+this.state.exceptionTableName+" WHERE "+sqlResult;

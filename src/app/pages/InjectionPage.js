@@ -6,7 +6,7 @@ import {
 } from '@material-ui/core';
 import _ from 'underscore';
 import moment from 'moment';
-import {getProcessDateAndVersion,getTableStageData,saveCustomerbaseDataApi,saveIpoApplicationDataApi} from '../../redux/Httpcalls';
+import {getProcessDateAndVersion,getTableStageData,saveCustomerbaseDataApi,saveIpoApplicationDataApi,savePartyDataApi} from '../../redux/Httpcalls';
 import {Modal,Form, Col, Badge,Spinner} from 'react-bootstrap';
 import CSVReader from 'react-csv-reader';
 import swal from 'sweetalert';
@@ -22,7 +22,8 @@ export default class InjectionPage extends Component{
 			selectedVersion:'',
 			allTableName:[
 			'customer_base',
-			'ipo_applications'
+			'ipo_applications',
+			'party'
 			],
 			processDatesArray:[],
 			versionDataArray:[],
@@ -172,7 +173,21 @@ export default class InjectionPage extends Component{
 				    swal("Wrong Datatype found!", {icon:"error"});
 				}); 
     	}
+    	
+    	if(this.state.selectedTableName == 'party'){
+    		savePartyDataApi(this.state.uploadedFileData).then((response) => {
+
+    			this.setState({uploadedFileData:[],enableSubmit:false,showUploadDataModalPopup:false,showuploaddataLoading:false},()=>{
+    				swal("Data Successfully Inserted!", {icon:"success"});
+    			});
+
+    		}, (error) => {
+    				this.setState({uploadedFileData:[],enableSubmit:false,showUploadDataModalPopup:false,showuploaddataLoading:false});
+				    swal("Wrong Datatype found!", {icon:"error"});
+				}); 
+    	}
     	});
+
 
     }
 

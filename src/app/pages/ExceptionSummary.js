@@ -126,6 +126,15 @@ const aiMlColumns = [{
     },
     attributeListForSuggestion: ["cust_acct_age", "credit_score", "yearly_trans_amt"],
     excepAttribute: "cust_classification"
+}, {
+    tableName: "v_party",
+    attributeValueMap: {
+        1: "silver",
+        2: "gold",
+        3: "platinum"
+    },
+    attributeListForSuggestion: [],
+    excepAttribute: "int_party_group_code"
 }];
 
 export default class ExceptionSummary extends Component {
@@ -314,7 +323,7 @@ export default class ExceptionSummary extends Component {
 
                     });
                 });
-            } else {
+            } else if(rowData.tableName === "v_ipo_applications") {
                 getStgApi({
                     primaryKey: rowData.primaryKey,
                     primaryKeyValue: item.trim().split("&&")[0],
@@ -353,6 +362,42 @@ export default class ExceptionSummary extends Component {
                             });
                         }
                     });
+                });
+            }
+            else if(rowData.tableName === "v_party"){
+                getStgApi({
+                    primaryKey: rowData.primaryKey,
+                    primaryKeyValue: item.trim().split("&&")[0],
+                    processDate: moment(rowData.processDate).format("M/DD/YYYY"),
+                    tableName: rowData.tableName,
+                    versionId: Number(rowData.version)
+                }).then(res => {
+                    filterColumn = aiMlColumns.find(a => a.tableName === rowData.tableName);
+                    let aiPayload = [];
+                    let adjRow = {};
+                    filterColumn.attributeListForSuggestion.forEach(e => {
+                        aiPayload.push(res.data[0][e]);
+                        adjRow[e] = res.data[0][e];
+                    });
+
+                 adjRow = {
+                        ...adjRow,
+                        id: item.trim().split("&&")[0],
+                        tableName: rowData.tableName,
+                        attribute: rowData.attribute,
+                        primaryKey: rowData.primaryKey,
+                        primaryKeyValue: item.trim().split("&&")[0],
+                        attributeOldValue: item.trim().split("&&")[1],
+                        processDate: moment(rowData.processDate).format("DD-MMM-YYYY").toUpperCase(),
+                        version: rowData.version,
+                        attributeValueSuggestion: ""
+                    };
+                adjustableRows.push(adjRow); 
+                   this.setState({
+                            openModal: true,
+                            adjustableRows,
+                            showLoading: false
+                        });
                 });
             }
         });

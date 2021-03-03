@@ -40,3 +40,5 @@ export const getTableStageData = (tableName,processDate,versionId) => {
 export const saveCustomerbaseDataApi = (postData) => newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/saveCustomerTableData',postData,{"Access-Control-Allow-Origin":"*"});
 
 export const saveIpoApplicationDataApi = (postData) => newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/saveIpoTableData',postData,{"Access-Control-Allow-Origin":"*"});
+
+export const savePartyDataApi = (postData) => newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/savePartyData',postData,{"Access-Control-Allow-Origin":"*"});
