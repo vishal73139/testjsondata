@@ -42,3 +42,5 @@ export const saveCustomerbaseDataApi = (postData) => newAxiosInstance.post('http
 export const saveIpoApplicationDataApi = (postData) => newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/saveIpoTableData',postData,{"Access-Control-Allow-Origin":"*"});
 
 export const savePartyDataApi = (postData) => newAxiosInstance.post('https://datapurereposervicenew.azurewebsites.net/savePartyData',postData,{"Access-Control-Allow-Origin":"*"});
+
+export const getAdjSuggestionsForParty = (postData) => newAxiosInstance.post('https://mlapimgmtsvc.azure-api.net/partygroupcode/score',postData,{"Access-Control-Allow-Origin":"*"});
