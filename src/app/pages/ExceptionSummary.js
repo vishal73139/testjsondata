@@ -44,7 +44,7 @@ const adjustmentColumns = [
     },
     {
         field: "primaryKeyValue",
-        headerName: "Customer Value",
+        headerName: "Party Id",
         flex: 1
     },
     {

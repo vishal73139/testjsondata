@@ -49,14 +49,20 @@ export default class ViewRules extends Component{
 		}
 	}
 
-	componentDidMount(){
-			getRules.then((response) => {
-				  this.setState({ruleData:response.data});
+	getRuleData = () => {
+		//alert('test');
+		getRules().then((response) => {
+				  this.setState({ruleData:[...response.data]});
 				  console.log(response);
 				}, (error) => {
 				  console.log(" API- ERROR - "+error);
 				});
 	}
+
+	componentDidMount(){
+			this.getRuleData();
+	}
+
 
 	handleExcuateRule = () => {
 		let selectedRules = this.state.executedRuleDetails; 
@@ -106,7 +112,20 @@ export default class ViewRules extends Component{
 
 	render(){
 		return(
+			<div>
+			<div className="row" style={{padding:'0px'}}>
+			 	<div className="col-lg-10 col-md-10">
+                        
+                 </div>
+			 	 <div className="col-lg-2 col-md-2" style={{textAlign:'right',padding:'0px'}}>
+                        <button class="btn btn-primary" onClick={()=>{
+                        	this.getRuleData();
+                        }} style={{marginRight:'10px',marginBottom:'10px'}}>Refresh Rules </button>
+                 </div>
+			 	
+			 </div>
 			<Paper>
+			 
 		      <Table>
 		        <TableHead>
 		          <TableRow>
@@ -268,6 +287,7 @@ export default class ViewRules extends Component{
 		        </Modal>
 		        
 		    </Paper>
+		    </div>
 			);
 	}
 }

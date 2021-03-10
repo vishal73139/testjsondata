@@ -248,7 +248,8 @@ constructor(props){
 					'ipo_name',
 					'cutoffprice_perlot',
 					'bid_amount_perlot',
-					'total_bid_amount'
+					'total_bid_amount',
+					'numberof_lots'
 				],
 				v_party:[
 					'int_party_group_code',
